@@ -1,0 +1,32 @@
+syntax = "proto3";
+package model;
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/MarchGe/go-admin-server/app/admin/grpc/pb/model";  // admin
+//option go_package = "github.com/MarchGe/go-admin-server/agent/grpc/pb/model";  // agent
+
+message CpuStat {
+  int32 physicalCores = 1;
+  int32 logicalCores = 2;
+  float usedPercent = 3;
+}
+
+message MemoryStat {
+  float total = 1;
+  float used = 2;
+  float usedPercent = 3;
+}
+
+message DiskStat {
+  float total = 1;
+  float used = 2;
+  float usedPercent = 3;
+}
+
+message SysStats {
+  string ip = 1;
+  CpuStat cpu = 2;
+  MemoryStat virtualMemory = 3;
+  MemoryStat swapMemory = 4;
+  DiskStat disk = 5;
+  google.protobuf.Timestamp timestamp = 6;
+}

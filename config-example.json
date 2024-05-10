@@ -1,0 +1,61 @@
+{
+  "environment": "dev",
+  "listen": ":14040",
+  "contextPath": "/admin",
+  "log": {
+    "level": "info",
+    "stackTrace": false,
+    "loginLog": true,
+    "opLog": true,
+    "exceptionLog": true
+  },
+  "encryptKey": "d6Jpjw78g978nm6gBGT92bpRCR719u5t",
+  "cookie": {
+    "authenticationKey": "2g7y4gX6wpQXGJG6MPgGpT37YdyymPH2",
+    "secretKey": "BUN6Ee6bSW8N5NbAW8R7Tpy88uP1jkz9",
+    "path": "/",
+    "maxAge": 2592000,
+    "secure": false,
+    "httpOnly": true
+  },
+  "trustedProxies": "127.0.0.1",
+  "pprof": {
+    "enable": false,
+    "port": 8082
+  },
+  "mysql": {
+    "host": "127.0.0.1",
+    "port": 3306,
+    "username": "user",
+    "password": "123456",
+    "database": "ml_admin",
+    "connPool": {
+      "maxOpenConns": 50,
+      "maxIdleConns": 1,
+      "connMaxLifetime": 3600,
+      "connMaxIdleTime": 30
+    },
+    "showSql": false,
+    "autoMigrate": false
+  },
+  "email": {
+    "mc": {
+      "host": "smtp.163.com",
+      "port": 465,
+      "username": "demo-user",
+      "password": "123456",
+      "from": "公司名<demo-user@163.com>",
+      "useSSL": true
+    },
+    "systemName": "XX管理系统",
+    "accessUrl": "http://127.0.0.1:8080"
+  },
+  "grpc": {
+    "enable": true,
+    "addr": ":15050"
+  },
+  "uploadPkgSizeLimit": 500,
+  "uploadPkgPath": "/home/user/pkg",
+  "workDir": "./.goadmin",
+  "scriptExecuteTimeout": 180
+}

@@ -1,0 +1,2708 @@
+definitions:
+  R.Result:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+      requestId:
+        type: string
+      value: {}
+    type: object
+  dvmodel.App:
+    properties:
+      createTime:
+        type: string
+      fileName:
+        type: string
+      id:
+        type: integer
+      key:
+        type: string
+      name:
+        type: string
+      port:
+        type: integer
+      updateTime:
+        type: string
+      version:
+        type: string
+    type: object
+  dvmodel.Group:
+    properties:
+      createTime:
+        type: string
+      hostList:
+        items:
+          $ref: '#/definitions/dvmodel.Host'
+        type: array
+      id:
+        type: integer
+      name:
+        type: string
+      sortNum:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  dvmodel.Host:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      port:
+        type: integer
+      sortNum:
+        type: integer
+      updateTime:
+        type: string
+      user:
+        type: string
+    type: object
+  dvmodel.Script:
+    properties:
+      content:
+        type: string
+      createTime:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      updateTime:
+        type: string
+      version:
+        type: string
+    type: object
+  dvmodel.Task:
+    properties:
+      associationId:
+        type: integer
+      associationType:
+        type: string
+      createTime:
+        type: string
+      cron:
+        type: string
+      executeType:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      status:
+        type: integer
+      type:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  model.Dept:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      parentId:
+        type: integer
+      sortNum:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  model.ExceptionLog:
+    properties:
+      body:
+        type: string
+      createTime:
+        type: string
+      error:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      nickname:
+        type: string
+      path:
+        type: string
+      query:
+        type: string
+      updateTime:
+        type: string
+      userAgent:
+        type: string
+      userId:
+        type: integer
+    type: object
+  model.Icon:
+    properties:
+      id:
+        type: integer
+      value:
+        type: string
+    type: object
+  model.Job:
+    properties:
+      createTime:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      sortNum:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  model.LoginLog:
+    properties:
+      address:
+        type: string
+      createTime:
+        type: string
+      deptName:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      nickname:
+        type: string
+      realName:
+        type: string
+      updateTime:
+        type: string
+      userAgent:
+        type: string
+      userId:
+        type: integer
+    type: object
+  model.Menu:
+    properties:
+      createTime:
+        type: string
+      display:
+        type: integer
+      external:
+        type: integer
+      externalWay:
+        type: integer
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      parentId:
+        type: integer
+      sortNum:
+        type: integer
+      symbol:
+        type: string
+      updateTime:
+        type: string
+      url:
+        type: string
+    type: object
+  model.OpLog:
+    properties:
+      action:
+        type: string
+      address:
+        type: string
+      body:
+        type: string
+      createTime:
+        type: string
+      deptName:
+        type: string
+      id:
+        type: integer
+      ip:
+        type: string
+      nickname:
+        type: string
+      path:
+        type: string
+      query:
+        type: string
+      realName:
+        type: string
+      target:
+        type: string
+      updateTime:
+        type: string
+      userAgent:
+        type: string
+      userId:
+        type: integer
+    type: object
+  model.Role:
+    properties:
+      createTime:
+        type: string
+      id:
+        type: integer
+      menuList:
+        items:
+          $ref: '#/definitions/model.Menu'
+        type: array
+      name:
+        type: string
+      sortNum:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  model.Settings:
+    properties:
+      id:
+        type: integer
+      key:
+        type: string
+      userId:
+        type: integer
+      value:
+        type: string
+    type: object
+  model.User:
+    properties:
+      birthday:
+        type: string
+      cellphone:
+        type: string
+      createTime:
+        type: string
+      dept:
+        $ref: '#/definitions/model.Dept'
+      deptId:
+        type: integer
+      email:
+        type: string
+      id:
+        type: integer
+      jobList:
+        items:
+          $ref: '#/definitions/model.Job'
+        type: array
+      menuList:
+        items:
+          $ref: '#/definitions/model.Menu'
+        type: array
+      name:
+        type: string
+      nickname:
+        type: string
+      roleList:
+        items:
+          $ref: '#/definitions/model.Role'
+        type: array
+      root:
+        type: boolean
+      sex:
+        type: integer
+      status:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  monitor.CpuInfo:
+    properties:
+      cores:
+        type: integer
+      family:
+        type: string
+      mhz:
+        type: number
+      modelName:
+        type: string
+      num:
+        type: integer
+      physicalId:
+        type: string
+      vendorId:
+        type: string
+    type: object
+  monitor.CpuStat:
+    properties:
+      logicalCores:
+        type: integer
+      physicalCores:
+        type: integer
+      usedPercent:
+        type: number
+    type: object
+  monitor.DiskStat:
+    properties:
+      total:
+        type: number
+      used:
+        type: number
+      usedPercent:
+        type: number
+    type: object
+  monitor.HostInfo:
+    properties:
+      cpuInfos:
+        items:
+          $ref: '#/definitions/monitor.CpuInfo'
+        type: array
+      hostName:
+        type: string
+      ip:
+        type: string
+      kernelArch:
+        type: string
+      kernelVersion:
+        type: string
+      platform:
+        type: string
+      platformVersion:
+        type: string
+      time:
+        type: string
+      upTime:
+        type: string
+    type: object
+  monitor.MemoryStat:
+    properties:
+      total:
+        type: number
+      used:
+        type: number
+      usedPercent:
+        type: number
+    type: object
+  monitor.SysStats:
+    properties:
+      cpu:
+        $ref: '#/definitions/monitor.CpuStat'
+      disk:
+        $ref: '#/definitions/monitor.DiskStat'
+      ip:
+        type: string
+      swapMemory:
+        $ref: '#/definitions/monitor.MemoryStat'
+      time:
+        type: string
+      virtualMemory:
+        $ref: '#/definitions/monitor.MemoryStat'
+    type: object
+  req.AppUpsertReq:
+    properties:
+      fileName:
+        maxLength: 100
+        type: string
+      key:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 50
+        type: string
+      port:
+        maximum: 65535
+        minimum: 1
+        type: integer
+      version:
+        maxLength: 50
+        type: string
+    required:
+    - fileName
+    - key
+    - name
+    - port
+    - version
+    type: object
+  req.ChangePasswdReq:
+    properties:
+      id:
+        minimum: 1
+        type: integer
+      newPassword:
+        maxLength: 30
+        minLength: 6
+        type: string
+    required:
+    - id
+    - newPassword
+    type: object
+  req.DeptUpsertReq:
+    properties:
+      name:
+        maxLength: 50
+        type: string
+      parentId:
+        minimum: 0
+        type: integer
+      sortNum:
+        type: integer
+    required:
+    - name
+    type: object
+  req.GroupUpsertReq:
+    properties:
+      hostIds:
+        items:
+          type: integer
+        maxItems: 10000
+        minItems: 1
+        type: array
+      name:
+        maxLength: 50
+        type: string
+      sortNum:
+        type: integer
+    required:
+    - hostIds
+    - name
+    type: object
+  req.HostUpsertReq:
+    properties:
+      ip:
+        maxLength: 50
+        type: string
+      name:
+        maxLength: 50
+        type: string
+      password:
+        type: string
+      passwordChanged:
+        description: 用于标识密码是否被手动修改
+        type: boolean
+      port:
+        maximum: 65535
+        minimum: 1
+        type: integer
+      sortNum:
+        type: integer
+      user:
+        maxLength: 50
+        type: string
+    required:
+    - ip
+    - name
+    - password
+    - port
+    - user
+    type: object
+  req.JobUpsertReq:
+    properties:
+      description:
+        maxLength: 255
+        type: string
+      name:
+        maxLength: 50
+        type: string
+      sortNum:
+        type: integer
+    required:
+    - name
+    type: object
+  req.LoginReq:
+    properties:
+      email:
+        type: string
+      password:
+        maxLength: 30
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  req.MenuUpsertReq:
+    properties:
+      display:
+        enum:
+        - 0
+        - 1
+        type: integer
+      external:
+        enum:
+        - 0
+        - 1
+        type: integer
+      externalWay:
+        enum:
+        - 0
+        - 1
+        type: integer
+      icon:
+        maxLength: 50
+        type: string
+      name:
+        maxLength: 20
+        type: string
+      parentId:
+        minimum: 0
+        type: integer
+      sortNum:
+        type: integer
+      symbol:
+        maxLength: 50
+        type: string
+      url:
+        maxLength: 100
+        type: string
+    required:
+    - name
+    type: object
+  req.RoleMenusUpdateReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        maxItems: 1000
+        type: array
+    required:
+    - ids
+    type: object
+  req.RoleUpsertReq:
+    properties:
+      name:
+        maxLength: 20
+        type: string
+      sortNum:
+        type: integer
+    required:
+    - name
+    type: object
+  req.ScriptUpsertReq:
+    properties:
+      content:
+        maxLength: 10000
+        type: string
+      description:
+        maxLength: 2000
+        type: string
+      name:
+        maxLength: 50
+        type: string
+      version:
+        maxLength: 50
+        type: string
+    required:
+    - content
+    - name
+    - version
+    type: object
+  req.SettingsUpsertReq:
+    properties:
+      key:
+        maxLength: 50
+        type: string
+      value:
+        maxLength: 2048
+        type: string
+    required:
+    - key
+    - value
+    type: object
+  req.TaskUpsertReq:
+    properties:
+      concrete:
+        additionalProperties: {}
+        type: object
+      cron:
+        maxLength: 50
+        type: string
+      executeType:
+        enum:
+        - 0
+        - 1
+        type: integer
+      name:
+        maxLength: 50
+        type: string
+      type:
+        enum:
+        - 1
+        type: integer
+    required:
+    - concrete
+    - name
+    - type
+    type: object
+  req.UpsertMyInfoReq:
+    properties:
+      cellphone:
+        type: string
+      nickname:
+        maxLength: 20
+        type: string
+    required:
+    - nickname
+    type: object
+  req.UserMenusUpdateReq:
+    properties:
+      ids:
+        items:
+          type: integer
+        maxItems: 1000
+        type: array
+    required:
+    - ids
+    type: object
+  req.UserUpsertReq:
+    properties:
+      birthday:
+        type: string
+      cellphone:
+        type: string
+      deptId:
+        minimum: 1
+        type: integer
+      email:
+        maxLength: 50
+        type: string
+      jobIds:
+        items:
+          type: integer
+        maxItems: 1000
+        minItems: 1
+        type: array
+      name:
+        maxLength: 20
+        type: string
+      nickname:
+        maxLength: 20
+        type: string
+      roleIds:
+        items:
+          type: integer
+        maxItems: 1000
+        minItems: 1
+        type: array
+      sex:
+        enum:
+        - 0
+        - 1
+        type: integer
+      shouldSendPassword:
+        description: 仅新增的时候有效
+        type: boolean
+    required:
+    - deptId
+    - email
+    - jobIds
+    - nickname
+    - roleIds
+    type: object
+  res.DeptTree:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/res.DeptTree'
+        type: array
+      createTime:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      parentId:
+        type: integer
+      sortNum:
+        type: integer
+      updateTime:
+        type: string
+    type: object
+  res.HostBasicRes:
+    properties:
+      id:
+        type: integer
+      ip:
+        type: string
+      name:
+        type: string
+    type: object
+  res.MenuTree:
+    properties:
+      children:
+        items:
+          $ref: '#/definitions/res.MenuTree'
+        type: array
+      createTime:
+        type: string
+      display:
+        type: integer
+      external:
+        type: integer
+      externalWay:
+        type: integer
+      icon:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      parentId:
+        type: integer
+      sortNum:
+        type: integer
+      symbol:
+        type: string
+      updateTime:
+        type: string
+      url:
+        type: string
+    type: object
+  res.PageableData-dvmodel_App:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/dvmodel.App'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-dvmodel_Group:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/dvmodel.Group'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-dvmodel_Host:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/dvmodel.Host'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-dvmodel_Script:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/dvmodel.Script'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-dvmodel_Task:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/dvmodel.Task'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-model_ExceptionLog:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.ExceptionLog'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-model_Job:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.Job'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-model_LoginLog:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.LoginLog'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-model_OpLog:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.OpLog'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-model_Role:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.Role'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-model_User:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/model.User'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-monitor_SysStats:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/monitor.SysStats'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-res_HostBasicRes:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/res.HostBasicRes'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.UploadRes:
+    properties:
+      fileName:
+        type: string
+      fileSize:
+        type: integer
+      tmpKey:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  title: go-admin API文档
+  version: 1.0.0
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 登录信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.User'
+              type: object
+      summary: 登录
+      tags:
+      - 账号相关
+  /auth/my-info:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.User'
+              type: object
+      summary: 查询我的信息
+      tags:
+      - 账号相关
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.UpsertMyInfoReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新我的信息
+      tags:
+      - 账号相关
+  /auth/passwd:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 修改密码信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.ChangePasswdReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 修改密码
+      tags:
+      - 账号相关
+  /auth/web-shell-token:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 获取WebShell连接需要的token
+      tags:
+      - 账号相关
+  /dept:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 部门信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.DeptUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加部门
+      tags:
+      - 部门管理
+  /dept/:id:
+    delete:
+      parameters:
+      - description: 部门ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除部门
+      tags:
+      - 部门管理
+    get:
+      parameters:
+      - description: 部门ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.Dept'
+              type: object
+      summary: 查询部门信息
+      tags:
+      - 部门管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 部门ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 部门信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.DeptUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 修改部门
+      tags:
+      - 部门管理
+  /dept/tree:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.DeptTree'
+              type: object
+      summary: 查询部门树
+      tags:
+      - 部门管理
+  /devops/app:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 应用信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.AppUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加应用
+      tags:
+      - 应用管理
+  /devops/app/:id:
+    delete:
+      parameters:
+      - description: 应用ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除应用
+      tags:
+      - 应用管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 应用ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 应用信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.AppUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新应用
+      tags:
+      - 应用管理
+  /devops/app/download:
+    get:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 文件Key路径
+        in: query
+        name: key
+        required: true
+        type: string
+      - description: 文件名
+        in: query
+        name: fileName
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 下载部署包
+      tags:
+      - 应用管理
+  /devops/app/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-dvmodel_App'
+              type: object
+      summary: 查询应用列表
+      tags:
+      - 应用管理
+  /devops/app/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 文件信息
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.UploadRes'
+              type: object
+      summary: 上传部署包
+      tags:
+      - 应用管理
+  /devops/group:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分组信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.GroupUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加分组
+      tags:
+      - 服务器分组管理
+  /devops/group/:id:
+    delete:
+      parameters:
+      - description: 分组ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除分组
+      tags:
+      - 服务器分组管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 分组ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 分组信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.GroupUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新分组
+      tags:
+      - 服务器分组管理
+  /devops/group/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-dvmodel_Group'
+              type: object
+      summary: 查询分组列表
+      tags:
+      - 服务器分组管理
+  /devops/host:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 服务器信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.HostUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加服务器
+      tags:
+      - 服务器管理
+  /devops/host/:id:
+    delete:
+      parameters:
+      - description: 服务器ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除服务器
+      tags:
+      - 服务器管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 服务器ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 服务器信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.HostUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新服务器
+      tags:
+      - 服务器管理
+  /devops/host/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-res_HostBasicRes'
+              type: object
+      summary: 查询全部服务器列表
+      tags:
+      - 服务器管理
+  /devops/host/connect-test:
+    get:
+      parameters:
+      - description: IP地址
+        in: query
+        name: ip
+        required: true
+        type: string
+      - description: 端口
+        in: query
+        name: port
+        required: true
+        type: integer
+      - description: 账号
+        in: query
+        name: user
+        required: true
+        type: string
+      - description: 密码
+        in: query
+        name: password
+        required: true
+        type: string
+      - description: 模式：0，新增；1，编辑
+        in: query
+        name: mode
+        required: true
+        type: string
+      - description: 是否修改了密码（仅编辑时有效）
+        in: query
+        name: passwordChanged
+        required: true
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: SSH连接测试
+      tags:
+      - 服务器管理
+  /devops/host/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-dvmodel_Host'
+              type: object
+      summary: 查询服务器列表
+      tags:
+      - 服务器管理
+  /devops/script:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 脚本信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.ScriptUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加脚本
+      tags:
+      - 脚本管理
+  /devops/script/:id:
+    delete:
+      parameters:
+      - description: 脚本ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除脚本
+      tags:
+      - 脚本管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 脚本ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 脚本信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.ScriptUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新脚本
+      tags:
+      - 脚本管理
+  /devops/script/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-dvmodel_Script'
+              type: object
+      summary: 查询脚本列表
+      tags:
+      - 脚本管理
+  /devops/task:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.TaskUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加任务
+      tags:
+      - 任务管理
+  /devops/task/:id:
+    delete:
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除任务
+      tags:
+      - 任务管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 任务信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.TaskUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新任务
+      tags:
+      - 任务管理
+  /devops/task/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-dvmodel_Task'
+              type: object
+      summary: 查询任务列表
+      tags:
+      - 任务管理
+  /devops/task/start/:id:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 启动任务
+      tags:
+      - 任务管理
+  /devops/task/stop/:id:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 停止任务
+      tags:
+      - 任务管理
+  /icon/all:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.Icon'
+              type: object
+      summary: 查询全部图标
+      tags:
+      - 图标管理
+  /job:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 岗位信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.JobUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加岗位
+      tags:
+      - 岗位管理
+  /job/:id:
+    delete:
+      parameters:
+      - description: 岗位ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除岗位
+      tags:
+      - 岗位管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 岗位ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 岗位信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.JobUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新岗位
+      tags:
+      - 岗位管理
+  /job/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-model_Job'
+              type: object
+      summary: 查询岗位列表
+      tags:
+      - 岗位管理
+  /log/exception:
+    delete:
+      parameters:
+      - description: 清除方式
+        in: query
+        name: type
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 清除异常日志
+      tags:
+      - 日志管理
+    get:
+      parameters:
+      - description: 按照用户名搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-model_ExceptionLog'
+              type: object
+      summary: 查询异常日志列表
+      tags:
+      - 日志管理
+  /log/login:
+    delete:
+      parameters:
+      - description: 清除方式
+        in: query
+        name: type
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 清除登录日志
+      tags:
+      - 日志管理
+    get:
+      parameters:
+      - description: 按照用户名搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-model_LoginLog'
+              type: object
+      summary: 查询登录日志列表
+      tags:
+      - 日志管理
+  /log/op:
+    delete:
+      parameters:
+      - description: 清除方式
+        in: query
+        name: type
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 清除操作日志
+      tags:
+      - 日志管理
+    get:
+      parameters:
+      - description: 按照用户名搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-model_OpLog'
+              type: object
+      summary: 查询操作日志列表
+      tags:
+      - 日志管理
+  /menu:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 菜单信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.MenuUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加菜单
+      tags:
+      - 菜单管理
+  /menu/:id:
+    delete:
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除菜单
+      tags:
+      - 菜单管理
+    get:
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.Menu'
+              type: object
+      summary: 查询菜单信息
+      tags:
+      - 菜单管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 菜单ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 菜单信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.MenuUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 修改菜单
+      tags:
+      - 菜单管理
+  /menu/my/permissions:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  items:
+                    type: string
+                  type: array
+              type: object
+      summary: 查询当前用户拥有的所有权限列表
+      tags:
+      - 菜单管理
+  /menu/my/tree:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.MenuTree'
+              type: object
+      summary: 查询当前用户有权限访问的菜单树（仅查询显示的菜单）
+      tags:
+      - 菜单管理
+  /menu/tree:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.MenuTree'
+              type: object
+      summary: 查询菜单树
+      tags:
+      - 菜单管理
+  /monitor/host:
+    delete:
+      parameters:
+      - description: 目标主机ip地址
+        in: query
+        name: ip
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除一条主机监控记录
+      tags:
+      - 性能监控
+  /monitor/host-info:
+    get:
+      parameters:
+      - description: 目标主机ip地址
+        in: query
+        name: ip
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/monitor.HostInfo'
+              type: object
+      summary: 获取主机信息
+      tags:
+      - 性能监控
+  /monitor/list:
+    get:
+      parameters:
+      - description: 按照IP模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-monitor_SysStats'
+              type: object
+      summary: 查询监控服务器列表
+      tags:
+      - 性能监控
+  /monitor/performance-stats:
+    get:
+      parameters:
+      - description: 目标主机ip地址
+        in: query
+        name: ip
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/monitor.SysStats'
+              type: object
+      summary: 获取最新性能监控数据
+      tags:
+      - 性能监控
+  /role:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.RoleUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加角色
+      tags:
+      - 角色管理
+  /role/:id:
+    delete:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除角色
+      tags:
+      - 角色管理
+    get:
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.Role'
+              type: object
+      summary: 查询角色信息
+      tags:
+      - 角色管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 角色ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 角色信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.RoleUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新角色
+      tags:
+      - 角色管理
+  /role/:id/menus:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 菜单列表
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.RoleMenusUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 角色绑定菜单
+      tags:
+      - 角色管理
+  /role/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-model_Role'
+              type: object
+      summary: 查询角色列表
+      tags:
+      - 角色管理
+  /settings:
+    get:
+      parameters:
+      - description: 键名
+        in: query
+        name: key
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.Settings'
+              type: object
+      summary: 查询系统信息
+      tags:
+      - 系统配置
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 配置信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.SettingsUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 保存/更新系统配置
+      tags:
+      - 系统配置
+  /sse/message-push:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - text/event-stream
+      responses: {}
+      summary: 服务端事件消息推送
+      tags:
+      - 消息服务
+  /sse/task/:id/host-log:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 主机IP
+        in: query
+        name: host
+        required: true
+        type: string
+      - description: 主机日志的文件名
+        in: query
+        name: hostLogName
+        required: true
+        type: string
+      produces:
+      - text/event-stream
+      responses: {}
+      summary: 推送远程主机日志
+      tags:
+      - 任务管理
+  /sse/task/:id/manifest-log:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/event-stream
+      responses: {}
+      summary: 推送manifest日志
+      tags:
+      - 任务管理
+  /terminal/ws:
+    get:
+      parameters:
+      - description: pty的行数
+        in: query
+        name: rows
+        required: true
+        type: integer
+      - description: pty的列数
+        in: query
+        name: cols
+        required: true
+        type: integer
+      - description: Web Shell连接使用的token
+        in: query
+        name: token
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+      summary: websocket连接
+      tags:
+      - Web Shell
+  /terminal/ws/ssh/:id:
+    get:
+      parameters:
+      - description: pty的行数
+        in: query
+        name: rows
+        required: true
+        type: integer
+      - description: pty的列数
+        in: query
+        name: cols
+        required: true
+        type: integer
+      - description: Web Shell连接使用的token
+        in: query
+        name: token
+        required: true
+        type: string
+      - description: 主机ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+      summary: websocket连接，并通过ssh连接其他主机
+      tags:
+      - Web Shell With SSH
+  /user:
+    post:
+      consumes:
+      - application/json
+      description: 添加用户，添加成功后，密码会通过邮箱发给用户
+      parameters:
+      - description: 用户信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.UserUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加用户
+      tags:
+      - 用户管理
+  /user/:id:
+    delete:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除用户
+      tags:
+      - 用户管理
+    get:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/model.User'
+              type: object
+      summary: 查询用户信息
+      tags:
+      - 用户管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 用户信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.UserUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新用户信息
+      tags:
+      - 用户管理
+  /user/:id/menus:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 菜单列表
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.UserMenusUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 用户绑定菜单
+      tags:
+      - 用户管理
+  /user/disable/:id:
+    put:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 禁用账号
+      tags:
+      - 用户管理
+  /user/enable/:id:
+    put:
+      parameters:
+      - description: 用户ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 启用账号
+      tags:
+      - 用户管理
+  /user/list:
+    get:
+      parameters:
+      - description: 搜索关键字（支持按名字、昵称、邮箱、手机号模糊搜索）
+        in: query
+        name: keyword
+        type: string
+      - description: 用户状态
+        in: query
+        name: status
+        type: integer
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      - collectionFormat: csv
+        description: 开始时间和结束时间
+        in: query
+        items:
+          type: string
+        name: dates
+        type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-model_User'
+              type: object
+      summary: 查询用户列表
+      tags:
+      - 用户管理
+  /user/passwd:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 修改密码信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.ChangePasswdReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 修改密码
+      tags:
+      - 用户管理
+  /user/passwd-reset/:id:
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 修改密码信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.ChangePasswdReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 重置密码
+      tags:
+      - 用户管理
+swagger: "2.0"

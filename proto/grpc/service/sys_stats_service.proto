@@ -1,0 +1,16 @@
+syntax = "proto3";
+package service;
+import "grpc/model/sys_stats.proto";
+import "grpc/model/host_info.proto";
+import "google/protobuf/empty.proto";
+option go_package = "github.com/MarchGe/go-admin-server/app/admin/grpc/pb/service";  // admin
+//option go_package = "github.com/MarchGe/go-admin-server/agent/grpc/pb/service";  // agent
+
+service SysStatsService {
+
+  // report performance statistics frequently
+  rpc reportSystemStats(model.SysStats) returns (google.protobuf.Empty);
+
+  // report host information, only report once after agent started
+  rpc reportHostInformation(model.HostInfo) returns (google.protobuf.Empty);
+}

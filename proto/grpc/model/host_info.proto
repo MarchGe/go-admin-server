@@ -1,0 +1,27 @@
+syntax = "proto3";
+package model;
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/MarchGe/go-admin-server/app/admin/grpc/pb/model";  // admin
+//option go_package = "github.com/MarchGe/go-admin-server/agent/grpc/pb/model";  // agent
+
+message HostInfo {
+  string ip = 1;
+  string hostName = 2;
+  string upTime = 3;
+  string platform = 4;
+  string platformVersion = 5;
+  string kernelVersion = 6;
+  string kernelArch = 7;
+  repeated CpuInfo cpuInfos = 8;
+  google.protobuf.Timestamp timestamp = 9;
+}
+
+message CpuInfo {
+  int32 num = 1;
+  string vendorId = 2;
+  string family = 3;
+  string physicalId = 4;
+  int32 cores = 5;
+  string modelName = 6;
+  float mhz = 7;
+}

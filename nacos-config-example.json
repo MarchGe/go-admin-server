@@ -1,0 +1,28 @@
+{
+  "username": "admin",
+  "password": "123456",
+  "namespaceId": "GO-ADMIN_DEV",
+  "dataId": "go-admin-server-local.json",
+  "group": "GO-ADMIN",
+  "type": "json",
+  "tag": "v0.0.1",
+  "servers": [
+    {
+      "ipAddr": "127.0.0.1",
+      "port": 8810,
+      "grpcPort":9810
+    }
+  ],
+  "clusterName": "",
+  "cacheDir": "./",
+  "notLoadCacheAtStart": true,
+  "logLevel": "info",
+  "logDir": "./",
+  "serviceInfo": {
+    "serviceName": "go-admin-server",
+    "Weight": 1,
+    "Enable": true,
+    "Healthy": true,
+    "Ephemeral": true
+  }
+}
