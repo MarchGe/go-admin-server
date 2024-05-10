@@ -220,6 +220,9 @@ func (s *UserService) DeleteUser(id int64) error {
 		if err := tx.Where("user_id = ?", id).Delete(&model.UserJob{}).Error; err != nil {
 			return err
 		}
+		if err := tx.Where("user_id = ?", id).Delete(&model.Settings{}).Error; err != nil {
+			return err
+		}
 		return authz.DeleteUser(authz.UserSub(id))
 	})
 	return err
