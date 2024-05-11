@@ -52,8 +52,8 @@ func getTasks() []scheduler.Task {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfg.Host, "host", "H", "", "Specify admin server host")
-	rootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 9080, "Specify admin server port")
-	rootCmd.PersistentFlags().IntVarP(&cfg.PerformanceReportFrequency, "performanceReportFrequency", "f", 2, "the frequency in seconds of reporting performance data to admin manage server")
+	rootCmd.PersistentFlags().IntVarP(&cfg.Port, "port", "p", 9080, "Specify admin server grpc port")
+	rootCmd.PersistentFlags().IntVarP(&cfg.PerformanceReportFrequency, "frequency", "f", 2, "The frequency in seconds of reporting performance data to admin server")
 }
 
 func Execute() {
