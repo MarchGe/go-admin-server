@@ -8,6 +8,10 @@ go-admin-server是go-admin项目的服务端程序，基于RBAC的权限模型�
 
 #### 在线体验
 - https://go-admin.dy-technology.com
+  ```text
+  账号：root@example.com
+  密码：123456
+  ```
 
 #### go-admin-server
 - 配置文件
