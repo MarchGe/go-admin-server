@@ -46,7 +46,7 @@ CREATE TABLE `dv_app`  (
   `version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '版本',
   `key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '部署包的路劲',
   `file_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '部署包的文件名',
-  `port` smallint(0) NOT NULL COMMENT '应用端口',
+  `port` int(0) NOT NULL COMMENT '应用端口',
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `idx_n_v`(`name`, `version`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
@@ -75,7 +75,7 @@ CREATE TABLE `dv_host`  (
   `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '名称',
   `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'IP',
-  `port` smallint(0) NOT NULL COMMENT 'ssh端口',
+  `port` int(0) NOT NULL COMMENT 'ssh端口',
   `user` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'ssh用户名',
   `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'ssh密码',
   `sort_num` int(0) NULL DEFAULT 0 COMMENT '顺序',
@@ -397,7 +397,6 @@ INSERT INTO `ops_menu` VALUES (57, 'menu:update', '编辑', '', 300, '', 0, 0, 4
 INSERT INTO `ops_menu` VALUES (58, 'menu:delete', '删除', '', 400, '', 0, 0, 4, '2024-03-13 00:00:36', '2024-03-13 00:00:36', 0);
 INSERT INTO `ops_menu` VALUES (59, '', '常用网站', 'tijikongjian', 300, '', 1, 0, 0, '2024-03-13 23:05:56', '2024-04-14 01:25:07', 0);
 INSERT INTO `ops_menu` VALUES (60, '', 'Element-Plus', 'zhinanzhidao', 1000, 'https://element-plus.org/zh-CN/', 1, 1, 59, '2024-03-13 23:07:07', '2024-04-04 04:01:24', 1);
-INSERT INTO `ops_menu` VALUES (62, 'icon:all', '查询全部图标', '', 500, '', 0, 0, 4, '2024-03-14 01:49:58', '2024-04-22 01:13:34', 0);
 INSERT INTO `ops_menu` VALUES (70, 'job:list', '列表', '', 100, '', 0, 0, 35, '2024-03-15 02:41:43', '2024-03-15 02:41:53', 0);
 INSERT INTO `ops_menu` VALUES (71, 'job:add', '新增', '', 200, '', 0, 0, 35, '2024-03-15 02:42:14', '2024-03-15 02:42:14', 0);
 INSERT INTO `ops_menu` VALUES (72, 'job:update', '编辑', '', 300, '', 0, 0, 35, '2024-03-15 02:42:31', '2024-03-15 02:42:31', 0);
