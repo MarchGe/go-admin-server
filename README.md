@@ -6,6 +6,9 @@ go-admin-server是go-admin项目的服务端程序，基于RBAC的权限模型�
 - GitHub: https://github.com/MarchGe/go-admin-server
 - Gitee: https://gitee.com/go-admin_1/go-admin-server
 
+#### 在线体验
+- https://go-admin.dy-technology.com
+
 #### go-admin-server
 - 配置文件
   - 支持使用nacos做配置中心或直接指定本地配置文件两种方式，以本地配置文件为例，启动示例：
