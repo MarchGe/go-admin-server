@@ -52,11 +52,11 @@ type CookieConfig struct {
 
 type Pprof struct {
 	Enable bool  `mapstructure:"enable"` // 是否开启pprof性能分析
-	Port   int16 `mapstructure:"port"`   // pprof性能分析服务监听的端口
+	Port   int32 `mapstructure:"port"`   // pprof性能分析服务监听的端口
 }
 type MysqlConfig struct {
 	Host     string `mapstructure:"host"`
-	Port     int16  `mapstructure:"port"`
+	Port     int32  `mapstructure:"port"`
 	Username string `mapstructure:"username"`
 	Password string `mapstructure:"password"`
 	Database string `mapstructure:"database"`

@@ -343,16 +343,17 @@ func (s *DeployTaskService) uploadFile(sftpClient *sftp.Client, localPath, remot
 		if errors.Is(err, os.ErrNotExist) {
 			return fmt.Errorf("app package %s not found", localPath)
 		} else {
-			return fmt.Errorf("open local file error, %w", err)
+			return fmt.Errorf("open local file %s error, %w", localPath, err)
 		}
 	}
 	defer func() { _ = localFile.Close() }()
-	if err = sftpClient.MkdirAll(path.Dir(remotePath)); err != nil {
-		return fmt.Errorf("sftp create remote dir error, %w", err)
+	remoteDir := path.Dir(remotePath)
+	if err = sftpClient.MkdirAll(remoteDir); err != nil {
+		return fmt.Errorf("sftp create remote dir %s error, %w", remoteDir, err)
 	}
 	remoteFile, err := sftpClient.Create(remotePath)
 	if err != nil {
-		return fmt.Errorf("sftp create remote file error, %w", err)
+		return fmt.Errorf("sftp create remote file %s error, %w", remotePath, err)
 	}
 	defer func() { _ = remoteFile.Close() }()
 	_, err = io.Copy(remoteFile, localFile)

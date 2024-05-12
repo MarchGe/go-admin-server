@@ -56,7 +56,7 @@ func (s *AppService) moveTmpPkg(tmpKey, key string) error {
 	cfg := config.GetConfig()
 	tmpFile := s.GetUploadTmpDir(cfg.WorkDir) + "/" + tmpKey
 	pkgFile := path.Clean(cfg.UploadPkgPath) + "/" + key
-	if err := os.MkdirAll(path.Dir(pkgFile), 0644); err != nil {
+	if err := os.MkdirAll(path.Dir(pkgFile), 0755); err != nil {
 		return fmt.Errorf("create directory %s error, %w", path.Dir(pkgFile), err)
 	}
 	if err := os.Rename(tmpFile, pkgFile); err != nil {
@@ -69,7 +69,7 @@ func (s *AppService) movePkg(oldKey, newKey string) error {
 	cfg := config.GetConfig()
 	oldFile := path.Clean(cfg.UploadPkgPath) + "/" + oldKey
 	newFile := path.Clean(cfg.UploadPkgPath) + "/" + newKey
-	if err := os.MkdirAll(path.Dir(newFile), 0644); err != nil {
+	if err := os.MkdirAll(path.Dir(newFile), 0755); err != nil {
 		return fmt.Errorf("create directory %s error, %w", path.Dir(newFile), err)
 	}
 	if err := os.Rename(oldFile, newFile); err != nil {
