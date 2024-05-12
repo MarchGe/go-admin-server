@@ -38,7 +38,7 @@ type ManifestEntry struct {
 
 func (s *LogService) createManifestLogFile(taskId int64) (*os.File, error) {
 	dir := s.getManifestLogDir(taskId)
-	if err := os.MkdirAll(dir, 666); err != nil {
+	if err := os.MkdirAll(dir, 755); err != nil {
 		return nil, err
 	}
 	fileName := "manifest-" + time.Now().Format("2006-01-02+15_04_05")
@@ -47,7 +47,7 @@ func (s *LogService) createManifestLogFile(taskId int64) (*os.File, error) {
 
 func (s *LogService) createHostLogFile(taskId int64, host, fileName string) (*os.File, error) {
 	dir := s.getHostLogDir(taskId, host)
-	if err := os.MkdirAll(dir, 666); err != nil {
+	if err := os.MkdirAll(dir, 755); err != nil {
 		return nil, err
 	}
 	return os.Create(dir + "/" + fileName)
