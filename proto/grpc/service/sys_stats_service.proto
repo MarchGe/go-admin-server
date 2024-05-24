@@ -11,6 +11,6 @@ service SysStatsService {
   // report performance statistics frequently
   rpc reportSystemStats(model.SysStats) returns (google.protobuf.Empty);
 
-  // report host information, only report once after agent started
+  // report host information frequently
   rpc reportHostInformation(model.HostInfo) returns (google.protobuf.Empty);
 }
