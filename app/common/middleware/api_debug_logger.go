@@ -20,6 +20,7 @@ func initDebugPatterns(contextPath string) {
 		contextPath + "/terminal/ws",
 		contextPath + "/terminal/ws/ssh/*",
 		contextPath + "/devops/app/upload",
+		contextPath + "/devops/explorer/upload",
 	}
 }
 
