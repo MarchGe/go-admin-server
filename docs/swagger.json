@@ -572,6 +572,152 @@
                 }
             }
         },
+        "/devops/explorer/download": {
+            "get": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器"
+                ],
+                "summary": "下载文件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件完整路径",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/entries": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器"
+                ],
+                "summary": "查询entry列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "目录路径",
+                        "name": "dir",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "按照名称模糊搜索",
+                        "name": "keyword",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/R.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/res.ExplorerEntry"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/entry": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器"
+                ],
+                "summary": "删除文件或文件夹",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件或文件夹的路径",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/upload": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器"
+                ],
+                "summary": "上传文件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件目录",
+                        "name": "dir",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "文件信息",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/devops/group": {
             "post": {
                 "consumes": [
@@ -3991,6 +4137,41 @@
                 },
                 "updateTime": {
                     "type": "string"
+                }
+            }
+        },
+        "res.EntryType": {
+            "type": "string",
+            "enum": [
+                "",
+                "d",
+                "l",
+                "c",
+                "b",
+                "s",
+                "p"
+            ],
+            "x-enum-comments": {
+                "EntryTypeDefault": "其他未具体处理的类型，统一归到这个类型下"
+            },
+            "x-enum-varnames": [
+                "EntryTypeDefault",
+                "EntryTypeDir",
+                "EntryTypeLink",
+                "EntryTypeCharDevice",
+                "EntryTypeBlockDevice",
+                "EntryTypeSocket",
+                "EntryTypeNamedPipe"
+            ]
+        },
+        "res.ExplorerEntry": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/res.EntryType"
                 }
             }
         },

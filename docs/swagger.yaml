@@ -720,6 +720,33 @@ definitions:
       updateTime:
         type: string
     type: object
+  res.EntryType:
+    enum:
+    - ""
+    - d
+    - l
+    - c
+    - b
+    - s
+    - p
+    type: string
+    x-enum-comments:
+      EntryTypeDefault: 其他未具体处理的类型，统一归到这个类型下
+    x-enum-varnames:
+    - EntryTypeDefault
+    - EntryTypeDir
+    - EntryTypeLink
+    - EntryTypeCharDevice
+    - EntryTypeBlockDevice
+    - EntryTypeSocket
+    - EntryTypeNamedPipe
+  res.ExplorerEntry:
+    properties:
+      name:
+        type: string
+      type:
+        $ref: '#/definitions/res.EntryType'
+    type: object
   res.HostBasicRes:
     properties:
       id:
@@ -1239,6 +1266,98 @@ paths:
       summary: 上传部署包
       tags:
       - 应用管理
+  /devops/explorer/download:
+    get:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 文件完整路径
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 下载文件
+      tags:
+      - 资源管理器
+  /devops/explorer/entries:
+    get:
+      parameters:
+      - description: 目录路径
+        in: query
+        name: dir
+        required: true
+        type: string
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  items:
+                    $ref: '#/definitions/res.ExplorerEntry'
+                  type: array
+              type: object
+      summary: 查询entry列表
+      tags:
+      - 资源管理器
+  /devops/explorer/entry:
+    delete:
+      parameters:
+      - description: 文件或文件夹的路径
+        in: query
+        name: path
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除文件或文件夹
+      tags:
+      - 资源管理器
+  /devops/explorer/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      parameters:
+      - description: 文件目录
+        in: formData
+        name: dir
+        required: true
+        type: string
+      - description: 文件信息
+        in: formData
+        name: file
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 上传文件
+      tags:
+      - 资源管理器
   /devops/group:
     post:
       consumes:
