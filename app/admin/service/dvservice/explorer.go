@@ -4,6 +4,7 @@ import (
 	"errors"
 	dvRes "github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/res"
 	"github.com/MarchGe/go-admin-server/app/common/E"
+	"io/fs"
 	"os"
 	"strings"
 )
@@ -20,6 +21,10 @@ func GetExplorerService() *ExplorerService {
 func (s *ExplorerService) ListEntries(parentDir, keyword string) ([]*dvRes.ExplorerEntry, error) {
 	info, err := os.Stat(parentDir)
 	if err != nil {
+		pathError := &fs.PathError{}
+		if errors.As(err, &pathError) {
+			return nil, E.Message("父目录参数有误")
+		}
 		return nil, err
 	}
 	if !info.IsDir() {
