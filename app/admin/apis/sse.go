@@ -62,7 +62,7 @@ func (a *SseApi) MessagePush(c *gin.Context) {
 //	@Tags		任务管理
 //	@Accept		application/json
 //	@Produce	text/event-stream
-//	@Param		id		path		int64	true	"任务ID"
+//	@Param		id	path	int64	true	"任务ID"
 //	@Router		/sse/task/:id/manifest-log [get]
 func (a *SseApi) PushManifestLogEvent(c *gin.Context) {
 	mtx := &sync.Mutex{}
@@ -137,9 +137,9 @@ func (a *SseApi) PushManifestLogEvent(c *gin.Context) {
 //	@Tags		任务管理
 //	@Accept		application/json
 //	@Produce	text/event-stream
-//	@Param		id			path		int64	true	"任务ID"
-//	@Param		host		query		string	true	"主机IP"
-//	@Param		hostLogName	query		string	true	"主机日志的文件名"
+//	@Param		id			path	int64	true	"任务ID"
+//	@Param		host		query	string	true	"主机IP"
+//	@Param		hostLogName	query	string	true	"主机日志的文件名"
 //	@Router		/sse/task/:id/host-log [get]
 func (a *SseApi) PushHostLogEvent(c *gin.Context) {
 	mtx := &sync.Mutex{}

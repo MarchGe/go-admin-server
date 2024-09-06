@@ -20,4 +20,5 @@ func registerExplorerRoutes(g *gin.RouterGroup) {
 	rg.GET("/entries", authz.RequiresPermissions("explorer:entries"), a.GetEntries)
 	rg.POST("/upload", authz.RequiresPermissions("explorer:upload"), a.Upload)
 	rg.GET("/download", authz.RequiresPermissions("explorer:download"), a.Download)
+	rg.POST("/create", authz.RequiresPermissions("explorer:create"), a.CreateDir)
 }

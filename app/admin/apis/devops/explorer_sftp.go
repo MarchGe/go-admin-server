@@ -2,8 +2,9 @@ package devops
 
 import (
 	"errors"
+	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
+	"github.com/MarchGe/go-admin-server/app/admin/service/dto/req"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice"
-	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/res"
 	"github.com/MarchGe/go-admin-server/app/common/E"
 	"github.com/MarchGe/go-admin-server/app/common/R"
 	ginUtils "github.com/MarchGe/go-admin-server/app/common/utils/gin_utils"
@@ -12,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -34,11 +34,11 @@ func GetExplorerSftpApi() *ExplorerSftpApi {
 // GetEntries godoc
 //
 //	@Summary	查询entry列表
-//	@Tags		资源管理器
+//	@Tags		资源管理器（SFTP）
 //	@Produce	application/json
-//	@Param		dir			query		string	true	"目录路径"
-//	@Param		hostId			query		int64	true	"主机的主键ID"
-//	@Success	200			{object}	R.Result{value=[]res.ExplorerEntry}
+//	@Param		dir		query		string	true	"目录路径"
+//	@Param		hostId	query		int64	true	"主机的主键ID"
+//	@Success	200		{object}	R.Result{value=[]res.ExplorerEntry}
 //	@Router		/devops/explorer/sftp/entries [get]
 func (a *ExplorerSftpApi) GetEntries(c *gin.Context) {
 	dir := ginUtils.GetStringQuery(c, "dir", "")
@@ -50,30 +50,23 @@ func (a *ExplorerSftpApi) GetEntries(c *gin.Context) {
 	if err != nil {
 		E.PanicErr(err)
 	}
-	if hostId == 0 {
-		R.Fail(c, "主机ID参数不能为空", http.StatusBadRequest)
-		return
-	}
-	host, err := a.hostService.FindOneById(hostId)
-	if err != nil {
-		E.PanicErr(err)
-	}
+	host := a.getHost(hostId)
 	entries, err := a.explorerSftpService.ListEntries(dir, host)
 	if err != nil {
 		E.PanicErr(err)
 	}
-	a.sortEntries(entries)
+	sortEntries(entries)
 	R.Success(c, entries)
 }
 
 // DeleteEntry godoc
 //
 //	@Summary	删除文件或文件夹
-//	@Tags		资源管理器
+//	@Tags		资源管理器（SFTP）
 //	@Produce	application/json
-//	@Param		path	query	string	true	"文件或文件夹的路径"
-//	@Param		hostId			query		int64	true	"主机的主键ID"
-//	@Success	200	{object}	R.Result
+//	@Param		path	query		string	true	"文件或文件夹的路径"
+//	@Param		hostId	query		int64	true	"主机的主键ID"
+//	@Success	200		{object}	R.Result
 //	@Router		/devops/explorer/sftp/entry [delete]
 func (a *ExplorerSftpApi) DeleteEntry(c *gin.Context) {
 	deletePath := ginUtils.GetStringQuery(c, "path", "")
@@ -85,10 +78,7 @@ func (a *ExplorerSftpApi) DeleteEntry(c *gin.Context) {
 	if err != nil {
 		E.PanicErr(err)
 	}
-	host, err := a.hostService.FindOneById(hostId)
-	if err != nil {
-		E.PanicErr(err)
-	}
+	host := a.getHost(hostId)
 	if err = a.explorerSftpService.DeleteEntry(deletePath, host); err != nil {
 		if errors.Is(err, os.ErrPermission) {
 			R.Fail(c, "文件系统：permission denied", http.StatusBadRequest)
@@ -106,12 +96,12 @@ func (a *ExplorerSftpApi) DeleteEntry(c *gin.Context) {
 // Upload godoc
 //
 //	@Summary	上传文件
-//	@Tags		资源管理器
+//	@Tags		资源管理器（SFTP）
 //	@Accept		multipart/form-data
 //	@Produce	application/json
-//	@Param		dir		formData		string	true	"文件目录"
-//	@Param		file	formData		file	true	"文件信息"
-//	@Param		hostId			formData		int64	true	"主机的主键ID"
+//	@Param		dir		formData	string	true	"文件目录"
+//	@Param		file	formData	file	true	"文件信息"
+//	@Param		hostId	formData	int64	true	"主机的主键ID"
 //	@Success	200		{object}	R.Result
 //	@Router		/devops/explorer/sftp/upload [post]
 func (a *ExplorerSftpApi) Upload(c *gin.Context) {
@@ -129,10 +119,7 @@ func (a *ExplorerSftpApi) Upload(c *gin.Context) {
 	if err != nil {
 		E.PanicErr(err)
 	}
-	host, err := a.hostService.FindOneById(int64(hostId))
-	if err != nil {
-		E.PanicErr(err)
-	}
+	host := a.getHost(int64(hostId))
 	filePath := path.Clean(dir) + "/" + file.Filename
 	f, err := file.Open()
 	if err != nil {
@@ -152,11 +139,11 @@ func (a *ExplorerSftpApi) Upload(c *gin.Context) {
 // Download godoc
 //
 //	@Summary	下载文件
-//	@Tags		资源管理器
+//	@Tags		资源管理器（SFTP）
 //	@Accept		multipart/form-data
 //	@Produce	application/json
-//	@Param		path			query		string	true	"文件完整路径"
-//	@Param		hostId			query		int64	true	"主机的主键ID"
+//	@Param		path	query		string	true	"文件完整路径"
+//	@Param		hostId	query		int64	true	"主机的主键ID"
 //	@Success	200		{object}	R.Result
 //	@Router		/devops/explorer/sftp/download [get]
 func (a *ExplorerSftpApi) Download(c *gin.Context) {
@@ -169,10 +156,7 @@ func (a *ExplorerSftpApi) Download(c *gin.Context) {
 	if err != nil {
 		E.PanicErr(err)
 	}
-	host, err := a.hostService.FindOneById(hostId)
-	if err != nil {
-		E.PanicErr(err)
-	}
+	host := a.getHost(hostId)
 	parts := strings.Split(filePath, "/")
 	fileName := parts[len(parts)-1]
 	c.Writer.Header().Add("Content-Type", "application/octet-stream")
@@ -188,34 +172,41 @@ func (a *ExplorerSftpApi) Download(c *gin.Context) {
 	c.Writer.Flush()
 }
 
-// sortEntries 排序规则：文件夹在前，然后按字母自然顺序排序（忽略大小写）
-func (a *ExplorerSftpApi) sortEntries(entries []*res.ExplorerEntry) {
-	length := len(entries)
-	sort.Slice(entries, func(i, j int) bool {
-		if entries[i].Type == res.EntryTypeDir {
-			return true
-		}
-		return false
-	})
-	dirNum := 0
-	for i := 0; i < length; i++ {
-		if entries[i].Type != res.EntryTypeDir {
-			dirNum = i
-			break
-		}
+// CreateDir godoc
+//
+//	@Summary	创建目录
+//	@Tags		资源管理器（SFTP）
+//	@Accept		application/json
+//	@Produce	application/json
+//	@Param		hostId		body		int64	true	"主机主键ID"
+//	@Param		dir		body		string	true	"当前目录"
+//	@Param		name	body		string	true	"创建目录的名称"
+//	@Success	200		{object}	R.Result
+//	@Router		/devops/explorer/sftp/create [post]
+func (a *ExplorerSftpApi) CreateDir(c *gin.Context) {
+	var body req.SftpCreateDirReq
+	if err := c.ShouldBindJSON(&body); err != nil {
+		E.PanicErr(err)
 	}
-	dirEntries := entries[0:dirNum]
-	sort.Slice(dirEntries, func(i, j int) bool {
-		if strings.Compare(strings.ToLower(dirEntries[i].Name), strings.ToLower(dirEntries[j].Name)) <= 0 {
-			return true
+
+	host := a.getHost(body.HostId)
+	if err := a.explorerSftpService.CreateDir(&body, host); err != nil {
+		if errors.Is(err, os.ErrPermission) {
+			R.Fail(c, "文件系统：permission denied", http.StatusBadRequest)
+			return
 		}
-		return false
-	})
-	nonDirEntries := entries[dirNum:]
-	sort.Slice(nonDirEntries, func(i, j int) bool {
-		if strings.Compare(strings.ToLower(nonDirEntries[i].Name), strings.ToLower(nonDirEntries[j].Name)) <= 0 {
-			return true
-		}
-		return false
-	})
+		E.PanicErr(err)
+	}
+	R.Success(c, nil)
+}
+
+func (a *ExplorerSftpApi) getHost(hostId int64) *dvmodel.Host {
+	if hostId == 0 {
+		E.PanicErr(E.Message("主机ID参数不能为空"))
+	}
+	host, err := a.hostService.FindOneById(hostId)
+	if err != nil {
+		E.PanicErr(err)
+	}
+	return host
 }

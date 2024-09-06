@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
+	"github.com/MarchGe/go-admin-server/app/admin/service/dto/req"
 	dvRes "github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/res"
 	"github.com/MarchGe/go-admin-server/app/common/E"
 	"github.com/MarchGe/go-admin-server/app/common/constant"
@@ -13,8 +14,10 @@ import (
 	"golang.org/x/crypto/ssh"
 	"io"
 	"io/fs"
+	"log/slog"
 	"mime/multipart"
 	"os"
+	"path"
 	"path/filepath"
 	"time"
 )
@@ -71,7 +74,8 @@ func (s *ExplorerSftpService) ListEntries(parentDir string, host *dvmodel.Host) 
 func (s *ExplorerSftpService) getSftpClient(host *dvmodel.Host) (*sftp.Client, error) {
 	sshClient, err := s.sshConnect(host)
 	if err != nil {
-		return nil, fmt.Errorf("ssh connect error, %w", err)
+		slog.Error("ssh connect error", slog.Any("err", err))
+		return nil, E.Message("SSH连接失败")
 	}
 	return sftp.NewClient(sshClient)
 }
@@ -141,4 +145,18 @@ func (s *ExplorerSftpService) DownloadFile(filePath string, host *dvmodel.Host) 
 		return nil, fmt.Errorf("sftp open file error, %w", err)
 	}
 	return file, nil
+}
+
+func (s *ExplorerSftpService) CreateDir(r *req.SftpCreateDirReq, host *dvmodel.Host) error {
+	client, err := s.getSftpClient(host)
+	if err != nil {
+		return fmt.Errorf("get sftp client error, %w", err)
+	}
+	defer func() { _ = client.Close() }()
+	dir := path.Clean(r.Dir + "/" + r.Name)
+	_, err = client.Stat(dir)
+	if !os.IsNotExist(err) {
+		return E.Message("目录已存在")
+	}
+	return client.MkdirAll(dir)
 }
