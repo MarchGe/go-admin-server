@@ -580,6 +580,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/devops/explorer/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "创建目录",
+                "parameters": [
+                    {
+                        "description": "当前目录",
+                        "name": "dir",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "创建目录的名称",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/devops/explorer/download": {
             "get": {
                 "consumes": [
@@ -695,6 +737,15 @@ const docTemplate = `{
                 ],
                 "summary": "创建目录",
                 "parameters": [
+                    {
+                        "description": "主机主键ID",
+                        "name": "hostId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
                     {
                         "description": "当前目录",
                         "name": "dir",

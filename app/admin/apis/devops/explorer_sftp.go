@@ -178,7 +178,7 @@ func (a *ExplorerSftpApi) Download(c *gin.Context) {
 //	@Tags		资源管理器（SFTP）
 //	@Accept		application/json
 //	@Produce	application/json
-//	@Param		hostId		body		int64	true	"主机主键ID"
+//	@Param		hostId	body		int64	true	"主机主键ID"
 //	@Param		dir		body		string	true	"当前目录"
 //	@Param		name	body		string	true	"创建目录的名称"
 //	@Success	200		{object}	R.Result

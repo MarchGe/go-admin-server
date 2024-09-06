@@ -1266,6 +1266,33 @@ paths:
       summary: 上传部署包
       tags:
       - 应用管理
+  /devops/explorer/create:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 当前目录
+        in: body
+        name: dir
+        required: true
+        schema:
+          type: string
+      - description: 创建目录的名称
+        in: body
+        name: name
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 创建目录
+      tags:
+      - 资源管理器（SFTP）
   /devops/explorer/download:
     get:
       consumes:
@@ -1334,6 +1361,12 @@ paths:
       consumes:
       - application/json
       parameters:
+      - description: 主机主键ID
+        in: body
+        name: hostId
+        required: true
+        schema:
+          type: integer
       - description: 当前目录
         in: body
         name: dir
