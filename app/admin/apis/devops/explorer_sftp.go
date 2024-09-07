@@ -200,6 +200,30 @@ func (a *ExplorerSftpApi) CreateDir(c *gin.Context) {
 	R.Success(c, nil)
 }
 
+// Rename godoc
+//
+//	@Summary	重命名
+//	@Tags		资源管理器（SFTP）
+//	@Accept		application/json
+//	@Produce	application/json
+//	@Param		hostId	body		int64	true	"主机主键ID"
+//	@Param		dir		body		string	true	"当前目录"
+//	@Param		oldName	body		string	true	"旧名称"
+//	@Param		newName	body		string	true	"新名称"
+//	@Success	200		{object}	R.Result
+//	@Router		/devops/explorer/sftp/rename [post]
+func (a *ExplorerSftpApi) Rename(c *gin.Context) {
+	var body req.SftpRenameReq
+	if err := c.ShouldBindJSON(&body); err != nil {
+		E.PanicErr(err)
+	}
+	host := a.getHost(body.HostId)
+	if err := a.explorerSftpService.Rename(&body, host); err != nil {
+		E.PanicErr(err)
+	}
+	R.Success(c, nil)
+}
+
 func (a *ExplorerSftpApi) getHost(hostId int64) *dvmodel.Host {
 	if hostId == 0 {
 		E.PanicErr(E.Message("主机ID参数不能为空"))

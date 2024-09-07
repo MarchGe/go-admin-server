@@ -163,6 +163,47 @@ func (a *ExplorerApi) CreateDir(c *gin.Context) {
 	R.Success(c, nil)
 }
 
+// Rename godoc
+//
+//	@Summary	重命名
+//	@Tags		资源管理器（SFTP）
+//	@Accept		application/json
+//	@Produce	application/json
+//	@Param		dir		body		string	true	"当前目录"
+//	@Param		oldName	body		string	true	"旧名称"
+//	@Param		newName	body		string	true	"新名称"
+//	@Success	200		{object}	R.Result
+//	@Router		/devops/explorer/rename [post]
+func (a *ExplorerApi) Rename(c *gin.Context) {
+	var body req.ExplorerRenameReq
+	if err := c.ShouldBindJSON(&body); err != nil {
+		E.PanicErr(err)
+	}
+	oldPath := path.Clean(body.Dir + "/" + body.OldName)
+	newPath := path.Clean(body.Dir + "/" + body.NewName)
+	if oldPath == newPath {
+		R.Success(c, nil)
+		return
+	}
+	_, err := os.Stat(newPath)
+	if !os.IsNotExist(err) {
+		R.Fail(c, "目标文件（或目录）已存在", http.StatusBadRequest)
+		return
+	}
+	if err = os.Rename(oldPath, newPath); err != nil {
+		if os.IsNotExist(err) {
+			R.Fail(c, "旧文件（或目录）不存在", http.StatusBadRequest)
+			return
+		}
+		if errors.Is(err, os.ErrPermission) {
+			R.Fail(c, "文件系统：permission denied", http.StatusBadRequest)
+			return
+		}
+		E.PanicErr(err)
+	}
+	R.Success(c, nil)
+}
+
 // sortEntries 排序规则：文件夹在前，然后按字母自然顺序排序（忽略大小写）
 func sortEntries(entries []*res.ExplorerEntry) {
 	length := len(entries)

@@ -21,4 +21,5 @@ func registerExplorerSftpRoutes(g *gin.RouterGroup) {
 	rg.POST("/upload", authz.RequiresPermissions("explorer_sftp:upload"), a.Upload)
 	rg.GET("/download", authz.RequiresPermissions("explorer_sftp:download"), a.Download)
 	rg.POST("/create", authz.RequiresPermissions("explorer_sftp:create"), a.CreateDir)
+	rg.POST("/rename", authz.RequiresPermissions("explorer_sftp:rename"), a.Rename)
 }

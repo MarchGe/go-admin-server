@@ -160,3 +160,30 @@ func (s *ExplorerSftpService) CreateDir(r *req.SftpCreateDirReq, host *dvmodel.H
 	}
 	return client.MkdirAll(dir)
 }
+
+func (s *ExplorerSftpService) Rename(r *req.SftpRenameReq, host *dvmodel.Host) error {
+	client, err := s.getSftpClient(host)
+	if err != nil {
+		return fmt.Errorf("get sftp client error, %w", err)
+	}
+	defer func() { _ = client.Close() }()
+	oldPath := path.Clean(r.Dir + "/" + r.OldName)
+	newPath := path.Clean(r.Dir + "/" + r.NewName)
+	if oldPath == newPath {
+		return nil
+	}
+	_, err = client.Stat(newPath)
+	if !os.IsNotExist(err) {
+		return E.Message("目标文件（或目录）已存在")
+	}
+	if err = client.Rename(oldPath, newPath); err != nil {
+		if os.IsNotExist(err) {
+			return E.Message("旧文件（或目录）不存在")
+		}
+		if errors.Is(err, os.ErrPermission) {
+			return E.Message("文件系统：permission denied")
+		}
+		return err
+	}
+	return nil
+}

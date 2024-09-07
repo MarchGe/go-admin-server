@@ -724,6 +724,57 @@ const docTemplate = `{
                 }
             }
         },
+        "/devops/explorer/rename": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "重命名",
+                "parameters": [
+                    {
+                        "description": "当前目录",
+                        "name": "dir",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "旧名称",
+                        "name": "oldName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "新名称",
+                        "name": "newName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/devops/explorer/sftp/create": {
             "post": {
                 "consumes": [
@@ -886,6 +937,66 @@ const docTemplate = `{
                         "name": "hostId",
                         "in": "query",
                         "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/sftp/rename": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "重命名",
+                "parameters": [
+                    {
+                        "description": "主机主键ID",
+                        "name": "hostId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "当前目录",
+                        "name": "dir",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "旧名称",
+                        "name": "oldName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "新名称",
+                        "name": "newName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
                     }
                 ],
                 "responses": {

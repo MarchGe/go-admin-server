@@ -1356,6 +1356,39 @@ paths:
       summary: 删除文件或文件夹
       tags:
       - 资源管理器
+  /devops/explorer/rename:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 当前目录
+        in: body
+        name: dir
+        required: true
+        schema:
+          type: string
+      - description: 旧名称
+        in: body
+        name: oldName
+        required: true
+        schema:
+          type: string
+      - description: 新名称
+        in: body
+        name: newName
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 重命名
+      tags:
+      - 资源管理器（SFTP）
   /devops/explorer/sftp/create:
     post:
       consumes:
@@ -1465,6 +1498,45 @@ paths:
           schema:
             $ref: '#/definitions/R.Result'
       summary: 删除文件或文件夹
+      tags:
+      - 资源管理器（SFTP）
+  /devops/explorer/sftp/rename:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 主机主键ID
+        in: body
+        name: hostId
+        required: true
+        schema:
+          type: integer
+      - description: 当前目录
+        in: body
+        name: dir
+        required: true
+        schema:
+          type: string
+      - description: 旧名称
+        in: body
+        name: oldName
+        required: true
+        schema:
+          type: string
+      - description: 新名称
+        in: body
+        name: newName
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 重命名
       tags:
       - 资源管理器（SFTP）
   /devops/explorer/sftp/upload:
