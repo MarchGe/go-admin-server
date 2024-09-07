@@ -126,7 +126,7 @@ func (a *TaskApi) GetList(c *gin.Context) {
 //	@Tags		任务管理
 //	@Accept		application/json
 //	@Produce	application/json
-//	@Success	200		{object}	R.Result
+//	@Success	200	{object}	R.Result
 //	@Router		/devops/task/start/:id [post]
 func (a *TaskApi) StartTask(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
@@ -147,7 +147,7 @@ func (a *TaskApi) StartTask(c *gin.Context) {
 //	@Tags		任务管理
 //	@Accept		application/json
 //	@Produce	application/json
-//	@Success	200		{object}	R.Result
+//	@Success	200	{object}	R.Result
 //	@Router		/devops/task/stop/:id [post]
 func (a *TaskApi) StopTask(c *gin.Context) {
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)

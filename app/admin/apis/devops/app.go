@@ -183,6 +183,10 @@ func (a *AppApi) DownloadPkg(c *gin.Context) {
 		R.Fail(c, "key不能为空", http.StatusBadRequest)
 		return
 	}
+	if strings.Contains(key, "..") {
+		R.Fail(c, "key值有误", http.StatusBadRequest)
+		return
+	}
 	fileName := c.Query("fileName")
 	if fileName == "" {
 		index := strings.LastIndex(key, "/")

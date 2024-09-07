@@ -21,7 +21,7 @@ go-admin-server是go-admin项目的服务端程序，基于RBAC的权限模型�
     ```
   项目中使用viper解析配置文件，配置文件格式支持json、yaml等，配置项内容：见config/config.go
 - 启动说明
-  - go-admin-server目前只支持单机部署，部署前，先执行数据库（MySQL）初始化脚本ml_admin.sql，
+  - go-admin-server目前只支持单机部署，初次部署时，修改配置文件中mysql.autoMigrate为true，会自动创建表结构，初始图标和菜单数据在脚本ml_admin.sql中，
     服务在初次启动时，会自动创建root超级账号，账号信息：
       ```
       Email:     root@example.com

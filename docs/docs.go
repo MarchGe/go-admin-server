@@ -580,6 +580,48 @@ const docTemplate = `{
                 }
             }
         },
+        "/devops/explorer/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "创建目录",
+                "parameters": [
+                    {
+                        "description": "当前目录",
+                        "name": "dir",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "创建目录的名称",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
         "/devops/explorer/download": {
             "get": {
                 "consumes": [
@@ -627,12 +669,6 @@ const docTemplate = `{
                         "name": "dir",
                         "in": "query",
                         "required": true
-                    },
-                    {
-                        "type": "string",
-                        "description": "按照名称模糊搜索",
-                        "name": "keyword",
-                        "in": "query"
                     }
                 ],
                 "responses": {
@@ -675,6 +711,336 @@ const docTemplate = `{
                         "description": "文件或文件夹的路径",
                         "name": "path",
                         "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/rename": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "重命名",
+                "parameters": [
+                    {
+                        "description": "当前目录",
+                        "name": "dir",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "旧名称",
+                        "name": "oldName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "新名称",
+                        "name": "newName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/sftp/create": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "创建目录",
+                "parameters": [
+                    {
+                        "description": "主机主键ID",
+                        "name": "hostId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "当前目录",
+                        "name": "dir",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "创建目录的名称",
+                        "name": "name",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/sftp/download": {
+            "get": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "下载文件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件完整路径",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "主机的主键ID",
+                        "name": "hostId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/sftp/entries": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "查询entry列表",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "目录路径",
+                        "name": "dir",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "主机的主键ID",
+                        "name": "hostId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/R.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "value": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/res.ExplorerEntry"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/sftp/entry": {
+            "delete": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "删除文件或文件夹",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件或文件夹的路径",
+                        "name": "path",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "主机的主键ID",
+                        "name": "hostId",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/sftp/rename": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "重命名",
+                "parameters": [
+                    {
+                        "description": "主机主键ID",
+                        "name": "hostId",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "description": "当前目录",
+                        "name": "dir",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "旧名称",
+                        "name": "oldName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "新名称",
+                        "name": "newName",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/R.Result"
+                        }
+                    }
+                }
+            }
+        },
+        "/devops/explorer/sftp/upload": {
+            "post": {
+                "consumes": [
+                    "multipart/form-data"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "资源管理器（SFTP）"
+                ],
+                "summary": "上传文件",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "文件目录",
+                        "name": "dir",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "file",
+                        "description": "文件信息",
+                        "name": "file",
+                        "in": "formData",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "主机的主键ID",
+                        "name": "hostId",
+                        "in": "formData",
                         "required": true
                     }
                 ],

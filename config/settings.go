@@ -1,3 +1,3 @@
 package config
 
-const Version = "v0.0.1-preview"
+const Version = "v0.1.0"
