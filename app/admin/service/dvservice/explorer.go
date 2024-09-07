@@ -6,7 +6,6 @@ import (
 	"github.com/MarchGe/go-admin-server/app/common/E"
 	"io/fs"
 	"os"
-	"strings"
 )
 
 var _explorerService = &ExplorerService{}
@@ -18,7 +17,7 @@ func GetExplorerService() *ExplorerService {
 	return _explorerService
 }
 
-func (s *ExplorerService) ListEntries(parentDir, keyword string) ([]*dvRes.ExplorerEntry, error) {
+func (s *ExplorerService) ListEntries(parentDir string) ([]*dvRes.ExplorerEntry, error) {
 	info, err := os.Stat(parentDir)
 	if err != nil {
 		pathError := &fs.PathError{}
@@ -37,29 +36,19 @@ func (s *ExplorerService) ListEntries(parentDir, keyword string) ([]*dvRes.Explo
 		}
 		return nil, err
 	}
-	var length = 0
-	if keyword == "" {
-		length = len(dirEntries)
-	}
-	for _, item := range dirEntries {
-		if keyword != "" && strings.Contains(item.Name(), keyword) {
-			length++
-		}
-	}
+	var length = len(dirEntries)
 	entries := make([]*dvRes.ExplorerEntry, length)
 	for i, item := range dirEntries {
-		if keyword == "" || keyword != "" && strings.Contains(item.Name(), keyword) {
-			entry := &dvRes.ExplorerEntry{
-				Name: item.Name(),
-				Type: s.parseType(item.Type()),
-			}
-			entries[i] = entry
+		entry := &dvRes.ExplorerEntry{
+			Name: item.Name(),
+			Type: parseType(item.Type()),
 		}
+		entries[i] = entry
 	}
 	return entries, nil
 }
 
-func (s *ExplorerService) parseType(mode os.FileMode) dvRes.EntryType {
+func parseType(mode os.FileMode) dvRes.EntryType {
 	fileType := mode.Type()
 	switch {
 	case fileType.IsDir():
