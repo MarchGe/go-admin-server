@@ -1,195 +1,16 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : MySQL（101.201.29.174）
  Source Server Type    : MySQL
  Source Server Version : 80024
- Source Host           : 101.201.29.174:3306
  Source Schema         : ml_admin
 
  Target Server Type    : MySQL
  Target Server Version : 80024
  File Encoding         : 65001
 
- Date: 11/05/2024 01:29:17
+ Date: 07/09/2024 17:46:21
 */
-
-SET NAMES utf8mb4;
-SET FOREIGN_KEY_CHECKS = 0;
-
--- ----------------------------
--- Table structure for casbin_rule
--- ----------------------------
-DROP TABLE IF EXISTS `casbin_rule`;
-CREATE TABLE `casbin_rule`  (
-  `id` bigint(0) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ptype` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `v0` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `v1` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `v2` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `v3` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `v4` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  `v5` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL,
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_casbin_rule`(`ptype`, `v0`, `v1`, `v2`, `v3`, `v4`, `v5`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2629 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dv_app
--- ----------------------------
-DROP TABLE IF EXISTS `dv_app`;
-CREATE TABLE `dv_app`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '名称',
-  `version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '版本',
-  `key` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '部署包的路劲',
-  `file_name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '部署包的文件名',
-  `port` int(0) NOT NULL COMMENT '应用端口',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_n_v`(`name`, `version`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 33 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dv_group
--- ----------------------------
-DROP TABLE IF EXISTS `dv_group`;
-CREATE TABLE `dv_group`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '分组名称',
-  `sort_num` int(0) NULL DEFAULT 0 COMMENT '顺序',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dv_host
--- ----------------------------
-DROP TABLE IF EXISTS `dv_host`;
-CREATE TABLE `dv_host`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '名称',
-  `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'IP',
-  `port` int(0) NOT NULL COMMENT 'ssh端口',
-  `user` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'ssh用户名',
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT 'ssh密码',
-  `sort_num` int(0) NULL DEFAULT 0 COMMENT '顺序',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_ip`(`ip`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dv_host_group
--- ----------------------------
-DROP TABLE IF EXISTS `dv_host_group`;
-CREATE TABLE `dv_host_group`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `host_id` bigint(0) NOT NULL COMMENT '主机ID',
-  `group_id` bigint(0) NOT NULL COMMENT '分组ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_h_g_id`(`group_id`, `host_id`) USING BTREE,
-  INDEX `idx_h_id`(`host_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 90 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dv_script
--- ----------------------------
-DROP TABLE IF EXISTS `dv_script`;
-CREATE TABLE `dv_script`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '名称',
-  `version` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '版本',
-  `content` varchar(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '脚本内容',
-  `description` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '使用说明',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_n_v`(`name`, `version`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dv_task
--- ----------------------------
-DROP TABLE IF EXISTS `dv_task`;
-CREATE TABLE `dv_task`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '名称',
-  `type` tinyint(0) NOT NULL COMMENT '任务类型',
-  `status` tinyint(0) NULL DEFAULT 0 COMMENT '任务状态',
-  `association_id` bigint(0) NOT NULL COMMENT '关联的具体任务的ID',
-  `association_type` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '关联的具体任务表类型',
-  `cron` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'cron表达式',
-  `execute_type` tinyint(0) NULL DEFAULT 0 COMMENT '执行方式',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for dv_task_deploy
--- ----------------------------
-DROP TABLE IF EXISTS `dv_task_deploy`;
-CREATE TABLE `dv_task_deploy`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `upload_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '部署包的上传路劲',
-  `app_id` bigint(0) NOT NULL COMMENT '关联的应用ID',
-  `script_id` bigint(0) NOT NULL COMMENT '关联的部署脚本ID',
-  `host_group_id` bigint(0) NOT NULL COMMENT '关联的服务器分组ID',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_dept
--- ----------------------------
-DROP TABLE IF EXISTS `ops_dept`;
-CREATE TABLE `ops_dept`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '部门名称',
-  `sort_num` int(0) NULL DEFAULT 0 COMMENT '部门顺序',
-  `parent_id` bigint(0) NULL DEFAULT 0 COMMENT '父级部门ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE,
-  INDEX `idx_pid`(`parent_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 52 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_exception_log
--- ----------------------------
-DROP TABLE IF EXISTS `ops_exception_log`;
-CREATE TABLE `ops_exception_log`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `user_id` bigint(0) NULL DEFAULT NULL COMMENT '登录用户的ID',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户昵称',
-  `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '登录IP',
-  `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '浏览器的userAgent',
-  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '请求url',
-  `query` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '请求url',
-  `body` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'body参数信息',
-  `error` varchar(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '错误内容',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_uname`(`nickname`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 84 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_icon
--- ----------------------------
-DROP TABLE IF EXISTS `ops_icon`;
-CREATE TABLE `ops_icon`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT,
-  `value` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '图标',
-  PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 114 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of ops_icon
@@ -309,63 +130,6 @@ INSERT INTO `ops_icon` VALUES (112, 'suofang');
 INSERT INTO `ops_icon` VALUES (113, 'shousuo');
 
 -- ----------------------------
--- Table structure for ops_job
--- ----------------------------
-DROP TABLE IF EXISTS `ops_job`;
-CREATE TABLE `ops_job`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '岗位名称',
-  `description` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '岗位描述',
-  `sort_num` bigint(0) NOT NULL DEFAULT 0 COMMENT '排序',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_login_log
--- ----------------------------
-DROP TABLE IF EXISTS `ops_login_log`;
-CREATE TABLE `ops_login_log`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `user_id` bigint(0) NULL DEFAULT NULL COMMENT '登录用户的ID',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户昵称',
-  `real_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户真名',
-  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '部门名称',
-  `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '登录IP',
-  `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '浏览器的userAgent',
-  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '登录地点',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_uname`(`nickname`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 56 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_menu
--- ----------------------------
-DROP TABLE IF EXISTS `ops_menu`;
-CREATE TABLE `ops_menu`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `symbol` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '权限标识',
-  `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '菜单名称',
-  `icon` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '菜单图标',
-  `sort_num` int(0) NOT NULL DEFAULT 0 COMMENT '菜单顺序',
-  `url` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '路由路径',
-  `display` tinyint(0) NOT NULL DEFAULT 0 COMMENT '是否显示，0-否，1-是',
-  `external` tinyint(0) NOT NULL DEFAULT 0 COMMENT '是否外链，0-否，1-是',
-  `parent_id` bigint(0) NOT NULL DEFAULT 0 COMMENT '父菜单ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `external_way` tinyint(0) NULL DEFAULT 0 COMMENT '外链打开方式（仅外链有效），0-外联，1-内嵌',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_pid`(`parent_id`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE,
-  INDEX `idx_symbol`(`symbol`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 137 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '菜单表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
 -- Records of ops_menu
 -- ----------------------------
 INSERT INTO `ops_menu` VALUES (1, '', '系统管理', 'xitongguanli', 100, '', 1, 0, 0, '2018-10-22 21:53:02', '2024-05-09 14:42:35', 0);
@@ -395,8 +159,6 @@ INSERT INTO `ops_menu` VALUES (55, 'role:menus', '分配权限', '', 500, '', 0,
 INSERT INTO `ops_menu` VALUES (56, 'menu:add', '新增', '', 200, '', 0, 0, 4, '2024-03-13 00:00:02', '2024-03-13 00:00:02', 0);
 INSERT INTO `ops_menu` VALUES (57, 'menu:update', '编辑', '', 300, '', 0, 0, 4, '2024-03-13 00:00:22', '2024-03-13 00:00:22', 0);
 INSERT INTO `ops_menu` VALUES (58, 'menu:delete', '删除', '', 400, '', 0, 0, 4, '2024-03-13 00:00:36', '2024-03-13 00:00:36', 0);
-INSERT INTO `ops_menu` VALUES (59, '', '常用网站', 'tijikongjian', 300, '', 1, 0, 0, '2024-03-13 23:05:56', '2024-04-14 01:25:07', 0);
-INSERT INTO `ops_menu` VALUES (60, '', 'Element-Plus', 'zhinanzhidao', 1000, 'https://element-plus.org/zh-CN/', 1, 1, 59, '2024-03-13 23:07:07', '2024-04-04 04:01:24', 1);
 INSERT INTO `ops_menu` VALUES (70, 'job:list', '列表', '', 100, '', 0, 0, 35, '2024-03-15 02:41:43', '2024-03-15 02:41:53', 0);
 INSERT INTO `ops_menu` VALUES (71, 'job:add', '新增', '', 200, '', 0, 0, 35, '2024-03-15 02:42:14', '2024-03-15 02:42:14', 0);
 INSERT INTO `ops_menu` VALUES (72, 'job:update', '编辑', '', 300, '', 0, 0, 35, '2024-03-15 02:42:31', '2024-03-15 02:42:31', 0);
@@ -451,145 +213,16 @@ INSERT INTO `ops_menu` VALUES (133, 'opLog:list', '列表', '', 100, '', 0, 0, 3
 INSERT INTO `ops_menu` VALUES (134, 'opLog:delete', '清空', '', 200, '', 0, 0, 39, '2024-05-09 14:59:25', '2024-05-09 14:59:25', 0);
 INSERT INTO `ops_menu` VALUES (135, 'exceptionLog:list', '列表', '', 100, '', 0, 0, 40, '2024-05-09 14:59:44', '2024-05-09 14:59:44', 0);
 INSERT INTO `ops_menu` VALUES (136, 'exceptionLog:delete', '清空', '', 200, '', 0, 0, 40, '2024-05-09 14:59:58', '2024-05-09 14:59:58', 0);
-
--- ----------------------------
--- Table structure for ops_op_log
--- ----------------------------
-DROP TABLE IF EXISTS `ops_op_log`;
-CREATE TABLE `ops_op_log`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `user_id` bigint(0) NULL DEFAULT NULL COMMENT '登录用户的ID',
-  `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '用户昵称',
-  `real_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '用户真名',
-  `dept_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '部门名称',
-  `ip` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '登录IP',
-  `user_agent` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '浏览器的userAgent',
-  `action` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作名称',
-  `target` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '操作对象',
-  `path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '请求url',
-  `query` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '请求url',
-  `body` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'body参数信息',
-  `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '登录地点',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_uname`(`nickname`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 1011 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_role
--- ----------------------------
-DROP TABLE IF EXISTS `ops_role`;
-CREATE TABLE `ops_role`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '角色名称',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `sort_num` bigint(0) NOT NULL DEFAULT 0 COMMENT '排序',
-  PRIMARY KEY (`id`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 40 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_role_menu
--- ----------------------------
-DROP TABLE IF EXISTS `ops_role_menu`;
-CREATE TABLE `ops_role_menu`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT,
-  `role_id` bigint(0) NOT NULL COMMENT '角色ID',
-  `menu_id` bigint(0) NOT NULL COMMENT '菜单ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_r_m_id`(`role_id`, `menu_id`) USING BTREE,
-  INDEX `idx_m_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3118 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色与菜单关联表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_role_user
--- ----------------------------
-DROP TABLE IF EXISTS `ops_role_user`;
-CREATE TABLE `ops_role_user`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT,
-  `role_id` bigint(0) NOT NULL COMMENT '角色ID',
-  `user_id` bigint(0) NOT NULL COMMENT '用户ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_r_u_id`(`role_id`, `user_id`) USING BTREE,
-  INDEX `idx_uid`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 231 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '角色与用户关联表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_settings
--- ----------------------------
-DROP TABLE IF EXISTS `ops_settings`;
-CREATE TABLE `ops_settings`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user_id` bigint(0) NOT NULL COMMENT '用户ID',
-  `key` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '键名',
-  `value` varchar(2048) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '值',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_uid_key`(`user_id`, `key`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_user
--- ----------------------------
-DROP TABLE IF EXISTS `ops_user`;
-CREATE TABLE `ops_user`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键',
-  `name` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '真实姓名',
-  `nickname` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '昵称',
-  `cellphone` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '手机号',
-  `email` varchar(100) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '邮箱',
-  `sex` tinyint(0) NOT NULL DEFAULT 0 COMMENT '性别，0-男，1-女',
-  `birthday` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '生日',
-  `status` tinyint(0) NOT NULL DEFAULT 0 COMMENT '账号状态，0-正常，1-禁用',
-  `root` tinyint(0) NOT NULL DEFAULT 0 COMMENT '是否超级用户，0-否，1-是',
-  `create_time` datetime(0) NOT NULL COMMENT '创建时间',
-  `update_time` datetime(0) NULL DEFAULT CURRENT_TIMESTAMP(0) ON UPDATE CURRENT_TIMESTAMP(0) COMMENT '更新时间',
-  `dept_id` bigint(0) NULL DEFAULT 0 COMMENT '部门ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_email`(`email`) USING BTREE,
-  INDEX `idx_name`(`name`) USING BTREE,
-  INDEX `idx_cellphone`(`cellphone`) USING BTREE,
-  INDEX `idx_nickname`(`nickname`) USING BTREE,
-  INDEX `fk_ops_user_dept`(`dept_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 78 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '系统用户表' ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_user_job
--- ----------------------------
-DROP TABLE IF EXISTS `ops_user_job`;
-CREATE TABLE `ops_user_job`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `user_id` bigint(0) NOT NULL COMMENT '用户ID',
-  `job_id` bigint(0) NOT NULL COMMENT '岗位ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_u_j_id`(`user_id`, `job_id`) USING BTREE,
-  INDEX `idx_j_id`(`job_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 105 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_user_menu
--- ----------------------------
-DROP TABLE IF EXISTS `ops_user_menu`;
-CREATE TABLE `ops_user_menu`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT,
-  `menu_id` bigint(0) NOT NULL COMMENT '菜单ID',
-  `user_id` bigint(0) NOT NULL COMMENT '用户ID',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_u_m_id`(`user_id`, `menu_id`) USING BTREE,
-  INDEX `idx_m_id`(`menu_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 390 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci ROW_FORMAT = Dynamic;
-
--- ----------------------------
--- Table structure for ops_user_password
--- ----------------------------
-DROP TABLE IF EXISTS `ops_user_password`;
-CREATE TABLE `ops_user_password`  (
-  `id` bigint(0) NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(0) NOT NULL COMMENT '用户ID',
-  `password` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL COMMENT '用户密码',
-  PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `idx_uid`(`user_id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 72 CHARACTER SET = utf8 COLLATE = utf8_general_ci COMMENT = '用户密码表' ROW_FORMAT = Dynamic;
-
-SET FOREIGN_KEY_CHECKS = 1;
+INSERT INTO `ops_menu` VALUES (137, '', 'Explorer', 'yewu', 200, '/devops/explorer', 1, 0, 112, '2024-05-22 22:37:37', '2024-05-24 17:40:28', 0);
+INSERT INTO `ops_menu` VALUES (138, 'explorer:entries', '列表', '', 100, '', 0, 0, 137, '2024-05-23 23:47:43', '2024-05-23 23:47:43', 0);
+INSERT INTO `ops_menu` VALUES (139, 'explorer:upload', '上传', '', 200, '', 0, 0, 137, '2024-05-23 23:48:29', '2024-05-23 23:48:29', 0);
+INSERT INTO `ops_menu` VALUES (140, 'explorer:download', '下载', '', 300, '', 0, 0, 137, '2024-05-23 23:48:49', '2024-05-23 23:48:49', 0);
+INSERT INTO `ops_menu` VALUES (141, 'explorer:delete', '删除', '', 400, '', 0, 0, 137, '2024-05-23 23:49:07', '2024-05-23 23:49:07', 0);
+INSERT INTO `ops_menu` VALUES (152, 'explorer_sftp:entries', 'SFTP - 列表', '', 700, '', 0, 0, 99, '2024-09-06 01:27:05', '2024-09-06 01:28:54', 0);
+INSERT INTO `ops_menu` VALUES (153, 'explorer_sftp:upload', 'SFTP - 上传', '', 800, '', 0, 0, 99, '2024-09-06 01:29:39', '2024-09-06 01:29:39', 0);
+INSERT INTO `ops_menu` VALUES (154, 'explorer_sftp:download', 'SFTP - 下载', '', 900, '', 0, 0, 99, '2024-09-06 01:30:09', '2024-09-06 01:30:09', 0);
+INSERT INTO `ops_menu` VALUES (155, 'explorer_sftp:delete', 'SFTP - 删除', '', 1000, '', 0, 0, 99, '2024-09-06 01:30:32', '2024-09-06 01:30:32', 0);
+INSERT INTO `ops_menu` VALUES (156, 'explorer_sftp:create', 'SFTP - 创建目录', '', 1100, '', 0, 0, 99, '2024-09-06 18:08:38', '2024-09-06 18:08:38', 0);
+INSERT INTO `ops_menu` VALUES (157, 'explorer:create', '创建目录', '', 500, '', 0, 0, 137, '2024-09-06 18:42:26', '2024-09-06 18:42:26', 0);
+INSERT INTO `ops_menu` VALUES (158, 'explorer_sftp:rename', 'SFTP - 重命名', '', 1200, '', 0, 0, 99, '2024-09-07 15:14:42', '2024-09-07 15:14:42', 0);
+INSERT INTO `ops_menu` VALUES (159, 'explorer:rename', '重命名', '', 600, '', 0, 0, 137, '2024-09-07 16:18:55', '2024-09-07 16:18:55', 0);
