@@ -9,7 +9,6 @@ import (
 	"github.com/MarchGe/go-admin-server/app/common/R"
 	ginUtils "github.com/MarchGe/go-admin-server/app/common/utils/gin_utils"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 	"os"
 	"path"
@@ -161,12 +160,8 @@ func (a *ExplorerSftpApi) Download(c *gin.Context) {
 	fileName := parts[len(parts)-1]
 	c.Writer.Header().Add("Content-Type", "application/octet-stream")
 	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+fileName)
-	file, err := a.explorerSftpService.DownloadFile(filePath, host)
+	err = a.explorerSftpService.DownloadFile(filePath, host, c.Writer)
 	if err != nil {
-		E.PanicErr(err)
-	}
-	defer func() { _ = file.Close() }()
-	if _, err = io.Copy(c.Writer, file); err != nil {
 		E.PanicErr(err)
 	}
 	c.Writer.Flush()
