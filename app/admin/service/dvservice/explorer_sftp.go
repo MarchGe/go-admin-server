@@ -125,26 +125,28 @@ func (s *ExplorerSftpService) UploadFile(filePath string, file multipart.File, h
 	return err
 }
 
-func (s *ExplorerSftpService) DownloadFile(filePath string, host *dvmodel.Host) (*sftp.File, error) {
+func (s *ExplorerSftpService) DownloadFile(filePath string, host *dvmodel.Host, w io.Writer) error {
 	client, err := s.getSftpClient(host)
 	if err != nil {
-		return nil, fmt.Errorf("get sftp client error, %w", err)
+		return fmt.Errorf("get sftp client error, %w", err)
 	}
-	defer func() { _ = client.Close() }()
+	defer client.Close()
 
 	info, err := client.Stat(filePath)
 	if err != nil {
-		return nil, E.Message("获取文件信息失败")
+		return E.Message("获取文件信息失败")
 	}
 	if info.IsDir() {
-		return nil, E.Message("不支持下载文件夹")
+		return E.Message("不支持下载文件夹")
 	}
 
 	file, err := client.Open(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("sftp open file error, %w", err)
+		return fmt.Errorf("sftp open file error, %w", err)
 	}
-	return file, nil
+	defer file.Close()
+	_, err = io.Copy(w, file)
+	return err
 }
 
 func (s *ExplorerSftpService) CreateDir(r *req.SftpCreateDirReq, host *dvmodel.Host) error {
