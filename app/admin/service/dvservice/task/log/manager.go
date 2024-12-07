@@ -53,8 +53,11 @@ func (s *Manager) OpenLatestManifestLogger(taskId int64) (*ManifestLogger, error
 	}
 	if len(entries) > 0 {
 		s.sortByNameDesc(entries)
-		file, err := os.Open(manifestLogDir + "/" + entries[0].Name())
-		return NewManifestLogger(file), err
+		file, e := os.Open(manifestLogDir + "/" + entries[0].Name())
+		if e != nil {
+			return nil, e
+		}
+		return NewManifestLogger(file), nil
 	}
 	return nil, errors.New("no file found: " + entries[0].Name())
 }
