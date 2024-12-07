@@ -6,12 +6,6 @@ import (
 	"log"
 )
 
-const (
-	DEV  = "dev"
-	PROD = "prod"
-	TEST = "test"
-)
-
 type Config struct {
 	Environment          string          `mapstructure:"environment"` // 环境 dev | test | prod
 	Listen               string          `mapstructure:"listen"`
@@ -94,6 +88,12 @@ type GrpcConfig struct {
 	Addr              string `mapstructure:"addr"`
 	ConnectionTimeout int    `mapstructure:"connectionTimeout"` // 单位：秒
 }
+
+const (
+	DEV  = "dev"
+	PROD = "prod"
+	TEST = "test"
+)
 
 var cfg *Config
 

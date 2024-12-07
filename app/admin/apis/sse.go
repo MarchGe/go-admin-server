@@ -1,12 +1,12 @@
 package apis
 
 import (
-	"bufio"
 	"context"
 	"errors"
-	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/task"
+	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/task/log"
 	"github.com/MarchGe/go-admin-server/app/admin/service/message"
 	"github.com/MarchGe/go-admin-server/app/common/constant"
+	"github.com/MarchGe/go-admin-server/app/common/constant/sse"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"io"
@@ -18,11 +18,20 @@ import (
 )
 
 var _sseApi = &SseApi{
-	sseService: &message.SseService{},
+	sseService:           &message.SseService{},
+	taskLogManager:       log.NewManager("data/log/task"),
+	scriptTaskLogManager: log.NewManager("data/log/script-task"),
 }
 
 type SseApi struct {
-	sseService *message.SseService
+	sseService           *message.SseService
+	taskLogManager       *log.Manager
+	scriptTaskLogManager *log.Manager
+}
+
+type LogManager interface {
+	OpenLatestManifestLogger(taskId int64) (*log.ManifestLogger, error)
+	OpenHostLogger(taskId int64, host string, hostLogName string) (*log.HostLogger, error)
 }
 
 func GetSseApi() *SseApi {
@@ -65,26 +74,41 @@ func (a *SseApi) MessagePush(c *gin.Context) {
 //	@Param		id	path	int64	true	"任务ID"
 //	@Router		/sse/task/:id/manifest-log [get]
 func (a *SseApi) PushManifestLogEvent(c *gin.Context) {
+	a.pushManifestLog(c, a.taskLogManager)
+}
+
+// PushScriptTaskManifestLog godoc
+//
+//	@Summary	推送manifest日志
+//	@Tags		任务管理
+//	@Accept		application/json
+//	@Produce	text/event-stream
+//	@Param		id	path	int64	true	"任务ID"
+//	@Router		/sse/script-task/:id/manifest-log [get]
+func (a *SseApi) PushScriptTaskManifestLog(c *gin.Context) {
+	a.pushManifestLog(c, a.scriptTaskLogManager)
+}
+
+func (a *SseApi) pushManifestLog(c *gin.Context, logManager LogManager) {
 	mtx := &sync.Mutex{}
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		a.sendEvent(c, mtx, constant.SseErrorEvent, err.Error())
+		a.sendEvent(c, mtx, sse.Error, err.Error())
 		return
 	}
 	w := c.Writer
 	a.setSSEHeader(c)
 
-	taskLogService := task.GetTaskLogService()
-	manifestFile, err := taskLogService.OpenLatestManifestLogFile(id)
+	manifestLogger, err := logManager.OpenLatestManifestLogger(id)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			a.sendEvent(c, mtx, constant.SseErrorEvent, "日志文件不存在")
+			a.sendEvent(c, mtx, sse.Error, "所请求的日志已被清理")
 			return
 		}
-		a.sendEvent(c, mtx, constant.SseErrorEvent, err.Error())
+		a.sendEvent(c, mtx, sse.Error, err.Error())
 		return
 	}
-	defer func() { _ = manifestFile.Close() }()
+	defer manifestLogger.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	var connClosed bool
@@ -102,29 +126,28 @@ func (a *SseApi) PushManifestLogEvent(c *gin.Context) {
 		}()
 		a.startHeartbeat(ctx, c, mtx)
 	}()
-	reader := bufio.NewReader(manifestFile)
+	reader := manifestLogger.GetReader()
 	for {
 		if connClosed {
 			break
 		}
 		line, err := reader.ReadString('\n')
 		if err != nil && !errors.Is(err, io.EOF) {
-			a.sendEvent(c, mtx, constant.SseErrorEvent, err.Error())
+			a.sendEvent(c, mtx, sse.Error, err.Error())
 			return
 		}
 		if line != "" {
-			entry, err := taskLogService.ParseManifestEntry(line)
-			if err != nil {
-				if errors.Is(err, task.ErrReachedLogEnd) {
-					a.sendEvent(c, mtx, constant.SseCloseEvent, "")
-					time.Sleep(2 * time.Second)
-					return
-				} else {
-					a.sendEvent(c, mtx, constant.SseErrorEvent, err.Error())
-					return
-				}
+			if log.IsEnd(line) {
+				a.sendEvent(c, mtx, sse.Close, "")
+				time.Sleep(2 * time.Second)
+				return
 			}
-			a.sendEvent(c, mtx, constant.SseManifestEntryEvent, entry)
+			entry, err := log.ParseEntry(line)
+			if err != nil {
+				a.sendEvent(c, mtx, sse.Error, err.Error())
+				return
+			}
+			a.sendEvent(c, mtx, sse.ManifestEntryEvent, entry)
 		} else {
 			time.Sleep(time.Second)
 		}
@@ -142,32 +165,48 @@ func (a *SseApi) PushManifestLogEvent(c *gin.Context) {
 //	@Param		hostLogName	query	string	true	"主机日志的文件名"
 //	@Router		/sse/task/:id/host-log [get]
 func (a *SseApi) PushHostLogEvent(c *gin.Context) {
+	a.pushHostLog(c, a.taskLogManager)
+}
+
+// PushScriptTaskHostLogEvent godoc
+//
+//	@Summary	推送远程主机日志
+//	@Tags		任务管理
+//	@Accept		application/json
+//	@Produce	text/event-stream
+//	@Param		id			path	int64	true	"任务ID"
+//	@Param		host		query	string	true	"主机IP"
+//	@Param		hostLogName	query	string	true	"主机日志的文件名"
+//	@Router		/sse/script-task/:id/host-log [get]
+func (a *SseApi) PushScriptTaskHostLogEvent(c *gin.Context) {
+	a.pushHostLog(c, a.scriptTaskLogManager)
+}
+func (a *SseApi) pushHostLog(c *gin.Context, logManager LogManager) {
 	mtx := &sync.Mutex{}
 	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err != nil {
-		a.sendEvent(c, mtx, constant.SseErrorEvent, err.Error())
+		a.sendEvent(c, mtx, sse.Error, err.Error())
 		return
 	}
 	host := c.Query("host")
 	hostLogName := c.Query("hostLogName")
 	if host == "" || hostLogName == "" {
-		a.sendEvent(c, mtx, constant.SseErrorEvent, "缺少参数")
+		a.sendEvent(c, mtx, sse.Error, "缺少参数")
 		return
 	}
 	w := c.Writer
 	a.setSSEHeader(c)
 
-	taskLogService := task.GetTaskLogService()
-	hostLogFile, err := taskLogService.OpenHostLogFile(id, host, hostLogName)
+	hostLogger, err := logManager.OpenHostLogger(id, host, hostLogName)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			a.sendEvent(c, mtx, constant.SseErrorEvent, "日志文件不存在")
+			a.sendEvent(c, mtx, sse.Error, "所请求的日志已被清理")
 			return
 		}
-		a.sendEvent(c, mtx, constant.SseErrorEvent, err.Error())
+		a.sendEvent(c, mtx, sse.Error, err.Error())
 		return
 	}
-	defer func() { _ = hostLogFile.Close() }()
+	defer hostLogger.Close()
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	var connClosed bool
@@ -185,42 +224,42 @@ func (a *SseApi) PushHostLogEvent(c *gin.Context) {
 		}()
 		a.startHeartbeat(ctx, c, mtx)
 	}()
-	reader := bufio.NewReader(hostLogFile)
+	reader := hostLogger.GetReader()
 	for {
 		if connClosed {
 			break
 		}
 		line, err := reader.ReadString('\n')
 		if err != nil && !errors.Is(err, io.EOF) {
-			a.sendEvent(c, mtx, constant.SseErrorEvent, err.Error())
+			a.sendEvent(c, mtx, sse.Error, err.Error())
 			return
 		}
 		if line != "" {
-			if taskLogService.IsLogEnd(line) {
-				a.sendEvent(c, mtx, constant.SseCloseEvent, "")
+			if log.IsEnd(line) {
+				a.sendEvent(c, mtx, sse.Close, "")
 				time.Sleep(2 * time.Second)
 				return
 			}
-			a.sendEvent(c, mtx, constant.SseHostLogEvent, line)
+			a.sendEvent(c, mtx, sse.HostLogEvent, line)
 		} else {
 			time.Sleep(time.Second)
 		}
 	}
 }
 
-func (a *SseApi) sendEvent(c *gin.Context, mtx *sync.Mutex, event string, msg any) {
+func (a *SseApi) sendEvent(c *gin.Context, mtx *sync.Mutex, event sse.Event, msg any) {
 	mtx.Lock()
 	defer mtx.Unlock()
-	c.SSEvent(event, msg)
+	c.SSEvent(event.String(), msg)
 	c.Writer.Flush()
 }
 
 func (a *SseApi) startHeartbeat(ctx context.Context, c *gin.Context, mtx *sync.Mutex) {
 	mtx.Lock()
-	c.SSEvent(constant.SseTickEvent, "")
+	c.SSEvent(sse.Tick.String(), "")
 	c.Writer.Flush()
 	mtx.Unlock()
-	ticker := time.NewTicker(constant.SseTickDuration)
+	ticker := time.NewTicker(sse.TickDuration)
 	defer ticker.Stop()
 	for {
 		select {
@@ -228,7 +267,7 @@ func (a *SseApi) startHeartbeat(ctx context.Context, c *gin.Context, mtx *sync.M
 			return
 		case <-ticker.C:
 			mtx.Lock()
-			c.SSEvent(constant.SseTickEvent, "")
+			c.SSEvent(sse.Tick.String(), "")
 			c.Writer.Flush()
 			mtx.Unlock()
 		}

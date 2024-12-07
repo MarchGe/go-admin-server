@@ -9,7 +9,9 @@ import (
 	_ "github.com/MarchGe/go-admin-server/app/admin/apis/routes/dvroutes"
 	"github.com/MarchGe/go-admin-server/app/admin/grpc"
 	"github.com/MarchGe/go-admin-server/app/admin/model"
+	"github.com/MarchGe/go-admin-server/app/admin/scheduler"
 	"github.com/MarchGe/go-admin-server/app/admin/service"
+	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/task"
 	"github.com/MarchGe/go-admin-server/app/common/database"
 	"github.com/MarchGe/go-admin-server/app/common/middleware"
 	"github.com/MarchGe/go-admin-server/app/common/nacos"
@@ -47,7 +49,8 @@ var Server = &cobra.Command{
 		}
 	},
 	Run: func(cmd *cobra.Command, args []string) {
-		loadConfig()
+		closeFunc := loadConfig()
+		defer closeFunc()
 
 		if cfg.Log.Level == "" {
 			cfg.Log.Level = "info"
@@ -104,6 +107,10 @@ var Server = &cobra.Command{
 		middleware.Initialize(cfg.ContextPath)
 		go runWebServer(ctx)
 
+		scheduler.Start()
+		defer scheduler.Stop()
+		task.InitActivatedTasks()
+
 		if cfg.Pprof.Enable {
 			go runPprofAnalysis()
 		}
@@ -138,20 +145,31 @@ func parseSlogLevel(level string) slog.Level {
 	}
 }
 
-func loadConfig() {
-	var nacoser *nacos.Nacoser
+type CloseFunc func()
+
+func loadConfig() CloseFunc {
+	var configManager config.Manager
+	var source config.Source
 	if nacosConfigFile != "" {
-		nc := getNacosConfigFromFile(nacosConfigFile)
-		nacoser = nacos.CreateNacoser(nc)
-		cfg = parseConfigFromString(nacoser.GetConfig(), nc.Type)
-		err := nacoser.RegisterService(cfg.Listen)
-		if err != nil {
-			log.Panicf("register service to nacos error: %v", err)
+		nacoser := nacos.CreateNacoser(getNacosConfigFromFile(nacosConfigFile))
+		source = &config.NacosSource{
+			Nacoser: nacoser,
 		}
 	} else {
-		cfg = loadConfigFromFile()
+		source = &config.FileSource{
+			FilePath: configFile,
+		}
 	}
-	config.Setup(cfg)
+	configManager.SetSource(source)
+	c, err := configManager.GetConfig()
+	if err != nil {
+		log.Panicf("get config from nacos error: %v", err)
+	}
+	cfg = c
+	config.Setup(c)
+	return func() {
+		configManager.CloseSource()
+	}
 }
 
 func init() {
@@ -165,37 +183,6 @@ func createRabbit(c rabbitmq.Config) (*rabbitmq.Rabbit, error) {
 		return nil, fmt.Errorf("create rabbit error, %w", err)
 	}
 	return rabbit, nil
-}
-
-func loadConfigFromFile() *config.Config {
-	c := &config.Config{}
-	if configFile == "" {
-		viper.SetConfigName("config")
-		viper.AddConfigPath(".")
-	} else {
-		viper.SetConfigFile(configFile)
-	}
-	if err := viper.ReadInConfig(); err != nil {
-		log.Panicf("read config file error: %v", err)
-	}
-	if err := viper.Unmarshal(c); err != nil {
-		log.Panicf("unmarshal config error: %v", err)
-	}
-	return c
-}
-
-func parseConfigFromString(sConfig, sType string) *config.Config {
-	c := &config.Config{}
-	reader := strings.NewReader(sConfig)
-	viper.SetConfigType(sType)
-	err := viper.ReadConfig(reader)
-	if err != nil {
-		log.Panicf("viper read config from byte buffer error: %v", err)
-	}
-	if err = viper.Unmarshal(c); err != nil {
-		log.Panicf("unmarshal config error: %v", err)
-	}
-	return c
 }
 
 func getNacosConfigFromFile(nacosConfigFile string) *nacos.Config {

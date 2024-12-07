@@ -83,29 +83,6 @@ definitions:
       version:
         type: string
     type: object
-  dvmodel.Task:
-    properties:
-      associationId:
-        type: integer
-      associationType:
-        type: string
-      createTime:
-        type: string
-      cron:
-        type: string
-      executeType:
-        type: integer
-      id:
-        type: integer
-      name:
-        type: string
-      status:
-        type: integer
-      type:
-        type: integer
-      updateTime:
-        type: string
-    type: object
   model.Dept:
     properties:
       createTime:
@@ -580,6 +557,32 @@ definitions:
     required:
     - name
     type: object
+  req.ScriptTaskUpsertReq:
+    properties:
+      cron:
+        maxLength: 50
+        type: string
+      hostGroupId:
+        minimum: 1
+        type: integer
+      kind:
+        allOf:
+        - $ref: '#/definitions/task.Kind'
+        enum:
+        - 0
+        - 1
+      name:
+        maxLength: 50
+        type: string
+      scriptIds:
+        items:
+          type: integer
+        minItems: 1
+        type: array
+    required:
+    - name
+    - scriptIds
+    type: object
   req.ScriptUpsertReq:
     properties:
       content:
@@ -620,17 +623,19 @@ definitions:
         maxLength: 50
         type: string
       executeType:
+        allOf:
+        - $ref: '#/definitions/task.ExecuteType'
         enum:
         - 0
         - 1
-        type: integer
       name:
         maxLength: 50
         type: string
       type:
+        allOf:
+        - $ref: '#/definitions/task.Type'
         enum:
         - 1
-        type: integer
     required:
     - concrete
     - name
@@ -823,15 +828,6 @@ definitions:
       total:
         type: integer
     type: object
-  res.PageableData-dvmodel_Task:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/dvmodel.Task'
-        type: array
-      total:
-        type: integer
-    type: object
   res.PageableData-model_ExceptionLog:
     properties:
       list:
@@ -904,6 +900,24 @@ definitions:
       total:
         type: integer
     type: object
+  res.PageableData-task_ScriptTask:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/task.ScriptTask'
+        type: array
+      total:
+        type: integer
+    type: object
+  res.PageableData-task_Task:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/task.Task'
+        type: array
+      total:
+        type: integer
+    type: object
   res.UploadRes:
     properties:
       fileName:
@@ -913,6 +927,106 @@ definitions:
       tmpKey:
         type: string
     type: object
+  task.ExecuteType:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-comments:
+      ExecuteTypeAuto: 任务执行方式 - 自动执行，根据cron表达式
+      ExecuteTypeManual: 任务执行方式 - 手动执行
+    x-enum-varnames:
+    - ExecuteTypeManual
+    - ExecuteTypeAuto
+  task.Kind:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-comments:
+      KindLocal: 任务类型 - 本地任务
+      KindRemote: 任务类型 - 远程任务
+    x-enum-varnames:
+    - KindLocal
+    - KindRemote
+  task.ScriptTask:
+    properties:
+      createTime:
+        type: string
+      cron:
+        type: string
+      executeType:
+        $ref: '#/definitions/task.ExecuteType'
+      hostGroup:
+        $ref: '#/definitions/dvmodel.Group'
+      hostGroupId:
+        type: integer
+      id:
+        type: integer
+      kind:
+        $ref: '#/definitions/task.Kind'
+      name:
+        type: string
+      scripts:
+        items:
+          $ref: '#/definitions/dvmodel.Script'
+        type: array
+      status:
+        $ref: '#/definitions/task.Status'
+      updateTime:
+        type: string
+    type: object
+  task.Status:
+    enum:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 4
+    type: integer
+    x-enum-comments:
+      StatusActive: 任务运行状态 - 已激活 （定时任务特有的状态）
+      StatusComplete: 任务运行状态 - 已完成
+      StatusNotRunning: 任务运行状态 - 未运行
+      StatusRunning: 任务运行状态 - 运行中
+      StatusStopped: 任务运行状态 - 失败
+    x-enum-varnames:
+    - StatusNotRunning
+    - StatusRunning
+    - StatusComplete
+    - StatusStopped
+    - StatusActive
+  task.Task:
+    properties:
+      associationId:
+        type: integer
+      associationType:
+        type: string
+      createTime:
+        type: string
+      cron:
+        type: string
+      executeType:
+        $ref: '#/definitions/task.ExecuteType'
+      id:
+        type: integer
+      name:
+        type: string
+      status:
+        $ref: '#/definitions/task.Status'
+      type:
+        $ref: '#/definitions/task.Type'
+      updateTime:
+        type: string
+    type: object
+  task.Type:
+    enum:
+    - 1
+    type: integer
+    x-enum-comments:
+      TypeDeploy: 任务类型 - 部署任务
+    x-enum-varnames:
+    - TypeDeploy
 host: localhost:8080
 info:
   contact: {}
@@ -1863,6 +1977,128 @@ paths:
       summary: 添加脚本
       tags:
       - 脚本管理
+  /devops/script-task:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.ScriptTaskUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 添加任务
+      tags:
+      - 脚本任务管理
+  /devops/script-task/:id:
+    delete:
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 删除任务
+      tags:
+      - 脚本任务管理
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 任务信息
+        in: body
+        name: '[body]'
+        required: true
+        schema:
+          $ref: '#/definitions/req.TaskUpsertReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 更新任务
+      tags:
+      - 脚本任务管理
+  /devops/script-task/list:
+    get:
+      parameters:
+      - description: 按照名称模糊搜索
+        in: query
+        name: keyword
+        type: string
+      - description: 页码
+        in: query
+        name: page
+        type: integer
+      - description: 每页查询条数
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/R.Result'
+            - properties:
+                value:
+                  $ref: '#/definitions/res.PageableData-task_ScriptTask'
+              type: object
+      summary: 查询任务列表
+      tags:
+      - 脚本任务管理
+  /devops/script-task/start/:id:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 启动任务
+      tags:
+      - 脚本任务管理
+  /devops/script-task/stop/:id:
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/R.Result'
+      summary: 停止任务
+      tags:
+      - 脚本任务管理
   /devops/script/:id:
     delete:
       parameters:
@@ -2025,7 +2261,7 @@ paths:
             - $ref: '#/definitions/R.Result'
             - properties:
                 value:
-                  $ref: '#/definitions/res.PageableData-dvmodel_Task'
+                  $ref: '#/definitions/res.PageableData-task_Task'
               type: object
       summary: 查询任务列表
       tags:
@@ -2733,6 +2969,48 @@ paths:
       summary: 服务端事件消息推送
       tags:
       - 消息服务
+  /sse/script-task/:id/host-log:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: 主机IP
+        in: query
+        name: host
+        required: true
+        type: string
+      - description: 主机日志的文件名
+        in: query
+        name: hostLogName
+        required: true
+        type: string
+      produces:
+      - text/event-stream
+      responses: {}
+      summary: 推送远程主机日志
+      tags:
+      - 任务管理
+  /sse/script-task/:id/manifest-log:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: 任务ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - text/event-stream
+      responses: {}
+      summary: 推送manifest日志
+      tags:
+      - 任务管理
   /sse/task/:id/host-log:
     get:
       consumes:

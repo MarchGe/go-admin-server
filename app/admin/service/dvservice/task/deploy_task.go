@@ -5,16 +5,17 @@ import (
 	"errors"
 	"fmt"
 	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
+	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel/task"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/req"
+	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/task/log"
 	"github.com/MarchGe/go-admin-server/app/admin/service/message"
 	"github.com/MarchGe/go-admin-server/app/common/E"
 	"github.com/MarchGe/go-admin-server/app/common/constant"
+	"github.com/MarchGe/go-admin-server/app/common/constant/sse"
 	"github.com/MarchGe/go-admin-server/app/common/database"
-	"github.com/MarchGe/go-admin-server/app/common/utils"
 	ginUtils "github.com/MarchGe/go-admin-server/app/common/utils/gin_utils"
 	"github.com/MarchGe/go-admin-server/config"
-	"github.com/google/uuid"
 	"github.com/pkg/sftp"
 	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
@@ -33,7 +34,8 @@ var _deployTaskService = &DeployTaskService{
 	appService:       dvservice.GetAppService(),
 	scriptService:    dvservice.GetScriptService(),
 	hostGroupService: dvservice.GetGroupService(),
-	taskLogService:   GetTaskLogService(),
+	sshService:       dvservice.GetSshService(),
+	logManager:       log.NewManager("data/log/task"),
 }
 var _ ConcreteTask = (*DeployTaskService)(nil)
 
@@ -41,7 +43,8 @@ type DeployTaskService struct {
 	appService       *dvservice.AppService
 	scriptService    *dvservice.ScriptService
 	hostGroupService *dvservice.GroupService
-	taskLogService   *LogService
+	sshService       *dvservice.SshService
+	logManager       *log.Manager
 }
 
 var runningMap = sync.Map{}
@@ -100,8 +103,8 @@ func (s *DeployTaskService) validate(concrete map[string]any) (*req.DeployTaskUp
 	return upsertReq, nil
 }
 
-func (s *DeployTaskService) FindOneById(id int64) (*dvmodel.DeployTask, error) {
-	t := &dvmodel.DeployTask{}
+func (s *DeployTaskService) FindOneById(id int64) (*task.DeployTask, error) {
+	t := &task.DeployTask{}
 	if err := database.GetMysql().Where("id = ?", id).First(t).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, E.Message("具体任务不存在")
@@ -112,19 +115,16 @@ func (s *DeployTaskService) FindOneById(id int64) (*dvmodel.DeployTask, error) {
 	return t, nil
 }
 
-func (s *DeployTaskService) Delete(tx *gorm.DB, t *dvmodel.Task) error {
-	if err := tx.Delete(&dvmodel.DeployTask{}, t.AssociationID).Error; err != nil {
+func (s *DeployTaskService) Delete(tx *gorm.DB, t *task.Task) error {
+	if err := tx.Delete(&task.DeployTask{}, t.AssociationID).Error; err != nil {
 		return err
 	}
-	deploymentLogDir := s.taskLogService.getTaskLogDir(t.Id)
-	go func() {
-		_ = os.RemoveAll(deploymentLogDir)
-	}()
+	go s.logManager.RemoveLogs(t.Id)
 	return nil
 }
 
-func (s *DeployTaskService) Start(ctx context.Context, t *dvmodel.Task) error {
-	if err := s.setTaskStatus(t.Id, dvmodel.TaskStatusRunning); err != nil {
+func (s *DeployTaskService) Start(ctx context.Context, t *task.Task) error {
+	if err := s.setTaskStatus(t.Id, task.StatusRunning); err != nil {
 		return err
 	}
 	go func() {
@@ -137,16 +137,17 @@ func (s *DeployTaskService) Start(ctx context.Context, t *dvmodel.Task) error {
 		uId := ctx.Value("uId").(int64)
 		if err := s.Run(ctx, t); err != nil {
 			s.handleDeployError(t.Id, uId, err)
+			return
 		}
-		if err := s.setTaskStatus(t.Id, dvmodel.TaskStatusComplete); err != nil {
+		if err := s.setTaskStatus(t.Id, task.StatusComplete); err != nil {
 			slog.Error("change task status error", slog.Any("err", err))
 		}
-		_ = message.GetSseService().PushEventMessage(uId, constant.SseTaskExecuteEndEvent, "部署结束")
+		_ = message.GetSseService().PushEventMessage(uId, sse.TaskExecuteEndEvent, "部署结束")
 	}()
 	return nil
 }
 
-func (s *DeployTaskService) Run(ctx context.Context, t *dvmodel.Task) error {
+func (s *DeployTaskService) Run(ctx context.Context, t *task.Task) error {
 	if _, ok := runningMap.Load(t.Id); ok {
 		return errors.New("任务已经启动")
 	}
@@ -165,17 +166,17 @@ func (s *DeployTaskService) Run(ctx context.Context, t *dvmodel.Task) error {
 	return s.batchDeploy(runningCtx, t, path.Clean(deployTask.UploadPath), app, group.HostList, script)
 }
 
-func (s *DeployTaskService) Stop(ctx context.Context, t *dvmodel.Task) error {
+func (s *DeployTaskService) Stop(ctx context.Context, t *task.Task) error {
 	value, loaded := runningMap.LoadAndDelete(t.Id)
 	if loaded {
 		cancel := value.(context.CancelFunc)
 		cancel()
 	}
-	return s.setTaskStatus(t.Id, dvmodel.TaskStatusStopped)
+	return s.setTaskStatus(t.Id, task.StatusStopped)
 }
 
-func (s *DeployTaskService) toModel(info *req.DeployTaskUpsertReq) *dvmodel.DeployTask {
-	return &dvmodel.DeployTask{
+func (s *DeployTaskService) toModel(info *req.DeployTaskUpsertReq) *task.DeployTask {
+	return &task.DeployTask{
 		UploadPath:  info.UploadPath,
 		AppId:       info.AppId,
 		ScriptId:    info.ScriptId,
@@ -183,14 +184,14 @@ func (s *DeployTaskService) toModel(info *req.DeployTaskUpsertReq) *dvmodel.Depl
 	}
 }
 
-func (s *DeployTaskService) copyProperties(info *req.DeployTaskUpsertReq, task *dvmodel.DeployTask) {
+func (s *DeployTaskService) copyProperties(info *req.DeployTaskUpsertReq, task *task.DeployTask) {
 	task.UploadPath = info.UploadPath
 	task.AppId = info.AppId
 	task.ScriptId = info.ScriptId
 	task.HostGroupId = info.HostGroupId
 }
 
-func (s *DeployTaskService) getRelationData(deployTask *dvmodel.DeployTask) (*dvmodel.App, *dvmodel.Script, *dvmodel.Group, error) {
+func (s *DeployTaskService) getRelationData(deployTask *task.DeployTask) (*dvmodel.App, *dvmodel.Script, *dvmodel.Group, error) {
 	app, _ := s.appService.FindOneById(deployTask.AppId)
 	if app == nil {
 		return nil, nil, nil, E.Message("关联的应用不存在")
@@ -209,41 +210,43 @@ func (s *DeployTaskService) getRelationData(deployTask *dvmodel.DeployTask) (*dv
 	return app, script, group, nil
 }
 
-func (s *DeployTaskService) batchDeploy(ctx context.Context, t *dvmodel.Task, remoteRoot string, app *dvmodel.App, hostList []*dvmodel.Host, script *dvmodel.Script) error {
+func (s *DeployTaskService) batchDeploy(ctx context.Context, t *task.Task, remoteRoot string, app *dvmodel.App, hostList []*dvmodel.Host, script *dvmodel.Script) error {
 	localRoot := path.Clean(config.GetConfig().UploadPkgPath)
 	localPath := localRoot + "/" + app.Key
-	manifestFile, err := s.taskLogService.createManifestLogFile(t.Id)
+	manifestLogger, err := s.logManager.CreateManifestLogger(t.Id)
 	if err != nil {
 		return err
 	}
 	defer func() {
-		_ = manifestFile.Close()
-		s.taskLogService.removeOldLogs(t.Id, 1) // 仅保留最新一次执行日志
+		manifestLogger.WriteEnd()
+		manifestLogger.Close()
+		s.logManager.RemoveOldLogs(t.Id, 1) // 仅保留最新一次执行日志
 	}()
 	for i := range hostList {
 		select {
 		case <-ctx.Done():
-			s.taskLogService.writeEnd(manifestFile)
+			manifestLogger.WriteEnd()
 			return errors.New("任务已停止")
 		default:
 			ip := hostList[i].Ip
-			hostFileName := strings.ReplaceAll(uuid.NewString(), "-", "")
-			hostFile, e := s.taskLogService.createHostLogFile(t.Id, ip, hostFileName)
+			hostLogger, e := s.logManager.CreateHostLogger(t.Id, ip)
 			if e != nil {
-				s.handleHostDeployError(manifestFile, hostFile, i, ip, hostFileName, e)
+				manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "失败"))
+				slog.Error("deploy to host error", slog.String("host", ip), slog.Any("err", err))
 				continue
 			}
-			s.taskLogService.appendManifestLog(manifestFile, i, ip, hostFileName, "正在部署...")
-			if err = s.deploy(hostFile, localPath, remoteRoot, app, hostList[i], script); err != nil {
-				s.handleHostDeployError(manifestFile, hostFile, i, ip, hostFileName, err)
+			manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "正在部署..."))
+			if err = s.deploy(hostLogger, localPath, remoteRoot, app, hostList[i], script); err != nil {
+				manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "失败"))
+				hostLogger.Append(err.Error() + constant.NewLine)
+				slog.Error("deploy to host error", slog.String("host", ip), slog.Any("err", err))
 			} else {
-				s.taskLogService.appendManifestLog(manifestFile, i, ip, hostFileName, "完成")
+				manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "完成"))
 			}
-			s.taskLogService.writeEnd(hostFile)
-			_ = hostFile.Close()
+			hostLogger.WriteEnd()
+			hostLogger.Close()
 		}
 	}
-	s.taskLogService.writeEnd(manifestFile)
 	return nil
 }
 
@@ -256,9 +259,9 @@ const (
 	envPkgName    = "pkgName"    // 部署包的文件名
 )
 
-func (s *DeployTaskService) deploy(hostFile *os.File, localPath string, remoteRoot string, app *dvmodel.App, host *dvmodel.Host, script *dvmodel.Script) error {
-	s.taskLogService.appendHostLog(hostFile, fmt.Sprintf("ssh connecting to host %s:%d", host.Ip, host.Port))
-	sshClient, err := s.createSshClient(host)
+func (s *DeployTaskService) deploy(hostLogger *log.HostLogger, localPath string, remoteRoot string, app *dvmodel.App, host *dvmodel.Host, script *dvmodel.Script) error {
+	hostLogger.Append(fmt.Sprintf("ssh connecting to host %s:%d", host.Ip, host.Port))
+	sshClient, err := s.sshService.CreateSshClient(host)
 	if err != nil {
 		return err
 	}
@@ -269,11 +272,11 @@ func (s *DeployTaskService) deploy(hostFile *os.File, localPath string, remoteRo
 	}
 	defer func() { _ = sftpClient.Close() }()
 	remotePath := remoteRoot + "/" + app.FileName
-	s.taskLogService.appendHostLog(hostFile, "uploading deployment package...")
+	hostLogger.Append("uploading deployment package...")
 	if err = s.uploadFile(sftpClient, localPath, remotePath); err != nil {
 		return err
 	}
-	s.taskLogService.appendHostLog(hostFile, "deployment package upload completed.")
+	hostLogger.Append("deployment package upload completed.")
 
 	session, err := sshClient.NewSession()
 	if err != nil {
@@ -300,9 +303,9 @@ func (s *DeployTaskService) deploy(hostFile *os.File, localPath string, remoteRo
 			_ = session.Close()
 		}
 	}()
-	s.taskLogService.appendHostLog(hostFile, "executing script: "+constant.NewLine+"```"+constant.NewLine+script.Content+constant.NewLine+"```")
-	session.Stdout = hostFile
-	session.Stderr = hostFile
+	hostLogger.Append("executing script: " + constant.NewLine + "```" + constant.NewLine + script.Content + constant.NewLine + "```")
+	session.Stdout = hostLogger.Original()
+	session.Stderr = hostLogger.Original()
 	if err = session.Run(cmdContent); err != nil {
 		if _, ok := err.(*ssh.ExitError); ok {
 			if exitError := err.(*ssh.ExitError); exitError.Signal() == string(ssh.SIGPIPE) {
@@ -311,30 +314,8 @@ func (s *DeployTaskService) deploy(hostFile *os.File, localPath string, remoteRo
 		}
 		return fmt.Errorf("ssh execute remote command error, %w", err)
 	}
-	s.taskLogService.appendHostLog(hostFile, "deploy completed.")
+	hostLogger.Append("deploy completed.")
 	return nil
-}
-
-func (s *DeployTaskService) createSshClient(host *dvmodel.Host) (*ssh.Client, error) {
-	encryptKey := config.GetConfig().EncryptKey
-	decryptPasswd, err := utils.DecryptString(encryptKey, host.Password, "")
-	if err != nil {
-		return nil, fmt.Errorf("decrypt password error, %w", err)
-	}
-	clientConfig := ssh.ClientConfig{
-		User: host.User,
-		Auth: []ssh.AuthMethod{
-			ssh.Password(decryptPasswd),
-		},
-		Timeout:         constant.SshEstablishTimeoutInSeconds * time.Second,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}
-	addr := fmt.Sprintf("%s:%d", host.Ip, host.Port)
-	client, err := ssh.Dial("tcp", addr, &clientConfig)
-	if err != nil {
-		return nil, fmt.Errorf("ssh connect failed, %w", err)
-	}
-	return client, nil
 }
 
 func (s *DeployTaskService) uploadFile(sftpClient *sftp.Client, localPath, remotePath string) error {
@@ -365,18 +346,12 @@ func (s *DeployTaskService) uploadFile(sftpClient *sftp.Client, localPath, remot
 
 func (s *DeployTaskService) handleDeployError(taskId, uId int64, err error) {
 	slog.Error("deploy error", slog.Any("err", err))
-	if err = s.setTaskStatus(taskId, dvmodel.TaskStatusStopped); err != nil {
-		slog.Error("change task status error", slog.Any("err", err))
+	if e := s.setTaskStatus(taskId, task.StatusStopped); e != nil {
+		slog.Error("change task status error", slog.Any("err", e))
 	}
-	_ = message.GetSseService().PushEventMessage(uId, constant.SseTaskExecuteFailEvent, err.Error())
+	_ = message.GetSseService().PushEventMessage(uId, sse.TaskExecuteFailEvent, err.Error())
 }
 
-func (s *DeployTaskService) handleHostDeployError(manifestFile *os.File, hostFile *os.File, index int, host, hostFileName string, err error) {
-	s.taskLogService.appendManifestLog(manifestFile, index, host, hostFileName, "失败")
-	s.taskLogService.appendHostLog(hostFile, err.Error()+constant.NewLine)
-	slog.Error("deploy to host error", slog.String("host", host), slog.Any("err", err))
-}
-
-func (s *DeployTaskService) setTaskStatus(taskId int64, status dvmodel.TaskStatus) error {
-	return database.GetMysql().Model(&dvmodel.Task{}).Where("id = ?", taskId).Update("status", status).Error
+func (s *DeployTaskService) setTaskStatus(taskId int64, status task.Status) error {
+	return database.GetMysql().Model(&task.Task{}).Where("id = ?", taskId).Update("status", status).Error
 }

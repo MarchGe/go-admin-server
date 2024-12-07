@@ -1,4 +1,4 @@
-package dvmodel
+package task
 
 type DeployTask struct {
 	Id          int64  `json:"id" gorm:"type:bigint(20);primaryKey;autoIncrement;comment:主键ID"`
