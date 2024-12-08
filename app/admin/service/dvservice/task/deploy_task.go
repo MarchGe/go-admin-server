@@ -26,7 +26,6 @@ import (
 	"runtime/debug"
 	"strconv"
 	"strings"
-	"sync"
 	"time"
 )
 
@@ -46,8 +45,6 @@ type DeployTaskService struct {
 	sshService       *dvservice.SshService
 	logManager       *log.Manager
 }
-
-var runningMap = sync.Map{}
 
 func (s *DeployTaskService) Create(tx *gorm.DB, data map[string]any) (int64, error) {
 	info, err := s.validate(data)
@@ -132,7 +129,6 @@ func (s *DeployTaskService) Start(ctx context.Context, t *task.Task) error {
 			if r := recover(); r != nil {
 				slog.Error("batch deploy error", slog.Any("err", r), slog.String("err stack", string(debug.Stack())))
 			}
-			runningMap.Delete(t.Id)
 		}()
 		uId := ctx.Value("uId").(int64)
 		if err := s.Run(ctx, t); err != nil {
@@ -148,13 +144,6 @@ func (s *DeployTaskService) Start(ctx context.Context, t *task.Task) error {
 }
 
 func (s *DeployTaskService) Run(ctx context.Context, t *task.Task) error {
-	if _, ok := runningMap.Load(t.Id); ok {
-		return errors.New("任务已经启动")
-	}
-	runningCtx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	runningMap.Store(t.Id, cancel)
-
 	deployTask, err := s.FindOneById(t.AssociationID)
 	if err != nil {
 		return err
@@ -163,15 +152,10 @@ func (s *DeployTaskService) Run(ctx context.Context, t *task.Task) error {
 	if err != nil {
 		return err
 	}
-	return s.batchDeploy(runningCtx, t, path.Clean(deployTask.UploadPath), app, group.HostList, script)
+	return s.batchDeploy(ctx, t, path.Clean(deployTask.UploadPath), app, group.HostList, script)
 }
 
 func (s *DeployTaskService) Stop(ctx context.Context, t *task.Task) error {
-	value, loaded := runningMap.LoadAndDelete(t.Id)
-	if loaded {
-		cancel := value.(context.CancelFunc)
-		cancel()
-	}
 	return s.setTaskStatus(t.Id, task.StatusStopped)
 }
 
@@ -223,29 +207,21 @@ func (s *DeployTaskService) batchDeploy(ctx context.Context, t *task.Task, remot
 		s.logManager.RemoveOldLogs(t.Id, 1) // 仅保留最新一次执行日志
 	}()
 	for i := range hostList {
-		select {
-		case <-ctx.Done():
-			manifestLogger.WriteEnd()
-			return errors.New("任务已停止")
-		default:
-			ip := hostList[i].Ip
-			hostLogger, e := s.logManager.CreateHostLogger(t.Id, ip)
-			if e != nil {
-				manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "失败"))
-				slog.Error("deploy to host error", slog.String("host", ip), slog.Any("err", err))
-				continue
-			}
-			manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "正在部署..."))
-			if err = s.deploy(hostLogger, localPath, remoteRoot, app, hostList[i], script); err != nil {
-				manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "失败"))
-				hostLogger.Append(err.Error() + constant.NewLine)
-				slog.Error("deploy to host error", slog.String("host", ip), slog.Any("err", err))
-			} else {
-				manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "完成"))
-			}
-			hostLogger.WriteEnd()
-			hostLogger.Close()
+		ip := hostList[i].Ip
+		hostLogger, e := s.logManager.CreateHostLogger(t.Id, ip)
+		if e != nil {
+			return e
 		}
+		manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "正在部署..."))
+		if err = s.deploy(hostLogger, localPath, remoteRoot, app, hostList[i], script); err != nil {
+			manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "失败"))
+			hostLogger.Append(err.Error())
+			slog.Error("deploy to host error", slog.String("host", ip), slog.Any("err", err))
+		} else {
+			manifestLogger.Append(log.NewEntry(i, ip, hostLogger.GetName(), "完成"))
+		}
+		hostLogger.WriteEnd()
+		hostLogger.Close()
 	}
 	return nil
 }
@@ -260,7 +236,7 @@ const (
 )
 
 func (s *DeployTaskService) deploy(hostLogger *log.HostLogger, localPath string, remoteRoot string, app *dvmodel.App, host *dvmodel.Host, script *dvmodel.Script) error {
-	hostLogger.Append(fmt.Sprintf("ssh connecting to host %s:%d", host.Ip, host.Port))
+	hostLogger.Append(fmt.Sprintf("Ssh connecting to host %s:%d", host.Ip, host.Port))
 	sshClient, err := s.sshService.CreateSshClient(host)
 	if err != nil {
 		return err
@@ -272,11 +248,11 @@ func (s *DeployTaskService) deploy(hostLogger *log.HostLogger, localPath string,
 	}
 	defer func() { _ = sftpClient.Close() }()
 	remotePath := remoteRoot + "/" + app.FileName
-	hostLogger.Append("uploading deployment package...")
+	hostLogger.Append("Uploading deployment package...")
 	if err = s.uploadFile(sftpClient, localPath, remotePath); err != nil {
 		return err
 	}
-	hostLogger.Append("deployment package upload completed.")
+	hostLogger.Append("Deployment package upload completed.")
 
 	session, err := sshClient.NewSession()
 	if err != nil {
@@ -303,18 +279,16 @@ func (s *DeployTaskService) deploy(hostLogger *log.HostLogger, localPath string,
 			_ = session.Close()
 		}
 	}()
-	hostLogger.Append("executing script: " + constant.NewLine + "```" + constant.NewLine + script.Content + constant.NewLine + "```")
+	hostLogger.Append("Executing script: " + constant.NewLine + "```" + constant.NewLine + script.Content + constant.NewLine + "```")
 	session.Stdout = hostLogger.Original()
 	session.Stderr = hostLogger.Original()
 	if err = session.Run(cmdContent); err != nil {
-		if _, ok := err.(*ssh.ExitError); ok {
-			if exitError := err.(*ssh.ExitError); exitError.Signal() == string(ssh.SIGPIPE) {
-				return fmt.Errorf("ssh execute remote command error, maybe execute timeout, %w", err)
-			}
+		if exitError, ok := err.(*ssh.ExitError); ok && exitError.Signal() == string(ssh.SIGPIPE) {
+			return fmt.Errorf("ssh command execution failed, maybe caused by a timeout, %w", err)
 		}
-		return fmt.Errorf("ssh execute remote command error, %w", err)
+		return fmt.Errorf("ssh execute command error, %w", err)
 	}
-	hostLogger.Append("deploy completed.")
+	hostLogger.Append("Deploy completed!")
 	return nil
 }
 

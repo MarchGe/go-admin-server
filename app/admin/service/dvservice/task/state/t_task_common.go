@@ -2,6 +2,7 @@ package state
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
 	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel/task"
@@ -14,6 +15,8 @@ import (
 	"github.com/MarchGe/go-admin-server/app/common/E"
 	"github.com/MarchGe/go-admin-server/app/common/constant/sse"
 	"github.com/MarchGe/go-admin-server/app/common/database"
+	"github.com/MarchGe/go-admin-server/config"
+	"golang.org/x/crypto/ssh"
 	"gorm.io/gorm"
 	"log/slog"
 	"os/exec"
@@ -38,9 +41,6 @@ func GetTaskStateCommon() *TaskStateCommon {
 }
 
 func (s *TaskStateCommon) Start(ctx context.Context, t *task.ScriptTask) error {
-	if err := s.updateStatus(t.Id, task.StatusActive); err != nil {
-		return err
-	}
 	if t.ExecuteType == task.ExecuteTypeAuto {
 		err := scheduler.AddTask(t.Id, t.Cron, func() {
 			if e := s.Run(ctx, t); e != nil {
@@ -51,7 +51,13 @@ func (s *TaskStateCommon) Start(ctx context.Context, t *task.ScriptTask) error {
 			s.updateStatus(t.Id, task.StatusStopped)
 			return err
 		}
+		if err = s.updateStatus(t.Id, task.StatusActive); err != nil {
+			return err
+		}
 	} else {
+		if err := s.updateStatus(t.Id, task.StatusRunning); err != nil {
+			return err
+		}
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
@@ -72,9 +78,6 @@ func (s *TaskStateCommon) Start(ctx context.Context, t *task.ScriptTask) error {
 
 func (s *TaskStateCommon) Run(ctx context.Context, t *task.ScriptTask) (err error) {
 	slog.Info("Executing script task", slog.Int64("id", t.Id), slog.String("name", t.Name))
-	if err = s.updateStatus(t.Id, task.StatusRunning); err != nil {
-		return err
-	}
 	defer func() {
 		if t.ExecuteType == task.ExecuteTypeAuto {
 			_ = s.updateStatusIfNotStopped(t.Id, task.StatusActive)
@@ -262,10 +265,24 @@ func (s *TaskStateCommon) executeRemoteScript(ctx context.Context, host *dvmodel
 		cmd.WriteString("set -e\n")
 		cmd.WriteString(fmt.Sprintf("echo '>>> Executing script: %s-%s'\n", script.Name, script.Version))
 		cmd.WriteString(script.Content + "\n")
+
+		scriptExecuteTimeout := config.GetConfig().ScriptExecuteTimeout
+		timeoutCtx, cancel := context.WithTimeout(context.Background(), time.Duration(scriptExecuteTimeout)*time.Second)
+		go func() {
+			<-timeoutCtx.Done()
+			if err = timeoutCtx.Err(); err != nil && errors.Is(err, context.DeadlineExceeded) {
+				session.Close()
+			}
+		}()
 		if e = session.Run(cmd.String()); e != nil {
+			cancel()
+			if exitError, ok := e.(*ssh.ExitError); ok && exitError.Signal() == string(ssh.SIGPIPE) {
+				return fmt.Errorf("ssh command execution failed, maybe caused by a timeout, %w", err)
+			}
 			session.Close()
-			return e
+			return fmt.Errorf("ssh execute command error, %w", e)
 		}
+		cancel()
 		session.Close()
 	}
 	return nil
