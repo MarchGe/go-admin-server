@@ -10,11 +10,13 @@ import (
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/req"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/task/log"
 	"github.com/MarchGe/go-admin-server/app/admin/service/message"
+	"github.com/MarchGe/go-admin-server/app/common"
 	"github.com/MarchGe/go-admin-server/app/common/E"
 	"github.com/MarchGe/go-admin-server/app/common/constant/sse"
 	"github.com/MarchGe/go-admin-server/app/common/database"
 	"gorm.io/gorm"
 	"log/slog"
+	"os/exec"
 	"runtime/debug"
 	"strings"
 	"time"
@@ -58,7 +60,7 @@ func (s *TaskStateCommon) Start(ctx context.Context, t *task.ScriptTask) error {
 			}()
 			uId := ctx.Value("uId").(int64)
 			if e := s.Run(ctx, t); e != nil {
-				slog.Error("execute task error", slog.Int64("taskId", t.Id), slog.Any("err", e))
+				slog.Error("Execute script task error", slog.Int64("taskId", t.Id), slog.Any("err", e))
 				_ = message.GetSseService().PushEventMessage(uId, sse.ScriptExecuteFailEvent, e.Error())
 			} else {
 				_ = message.GetSseService().PushEventMessage(uId, sse.ScriptExecuteEndEvent, "任务执行结束")
@@ -163,10 +165,32 @@ func (s *TaskStateCommon) updateStatusIfNotStopped(id int64, status task.Status)
 }
 
 func (s *TaskStateCommon) executeLocalTask(ctx context.Context, t *task.ScriptTask) error {
-	if err := s.updateStatus(t.Id, task.StatusRunning); err != nil {
+	manifestLogger, e := s.logManager.CreateManifestLogger(t.Id)
+	if e != nil {
+		return e
+	}
+	defer func() {
+		manifestLogger.WriteEnd()
+		manifestLogger.Close()
+		s.logManager.RemoveOldLogs(t.Id, 1)
+	}()
+	host := "127.0.0.1"
+	hostLogger, err := s.logManager.CreateHostLogger(t.Id, host)
+	if err != nil {
 		return err
 	}
-	// TODO
+	defer func() {
+		hostLogger.WriteEnd()
+		hostLogger.Close()
+	}()
+	manifestLogger.Append(log.NewEntry(0, host, hostLogger.GetName(), "正在执行..."))
+	if err = s.executeLocalScript(ctx, t, hostLogger); err != nil {
+		manifestLogger.Append(log.NewEntry(0, host, hostLogger.GetName(), "失败"))
+		hostLogger.Append(err.Error())
+		return err
+	} else {
+		manifestLogger.Append(log.NewEntry(0, host, hostLogger.GetName(), "完成"))
+	}
 	return nil
 }
 
@@ -189,6 +213,7 @@ func (s *TaskStateCommon) executeRemoteTask(ctx context.Context, t *task.ScriptT
 		manifestLogger.Append(log.NewEntry(i, host.Ip, hostLogger.GetName(), "正在执行..."))
 		if err = s.executeRemoteScript(ctx, host, t, hostLogger); err != nil {
 			manifestLogger.Append(log.NewEntry(i, host.Ip, hostLogger.GetName(), "失败"))
+			hostLogger.Append(err.Error())
 			slog.Error("execute remote script error", slog.String("host", host.Ip), slog.Any("err", err))
 		} else {
 			manifestLogger.Append(log.NewEntry(i, host.Ip, hostLogger.GetName(), "完成"))
@@ -199,6 +224,26 @@ func (s *TaskStateCommon) executeRemoteTask(ctx context.Context, t *task.ScriptT
 	return nil
 }
 
+func (s *TaskStateCommon) executeLocalScript(ctx context.Context, t *task.ScriptTask, hostLogger *log.HostLogger) error {
+	bash, err := common.GetBash()
+	if err != nil {
+		return err
+	}
+	scripts := t.Scripts
+	for _, script := range scripts {
+		cmd := strings.Builder{}
+		cmd.WriteString("set -e\n")
+		cmd.WriteString(fmt.Sprintf("echo '>>> Executing script: %s-%s'\n", script.Name, script.Version))
+		cmd.WriteString(script.Content + "\n")
+		command := exec.Command(bash, "-c", cmd.String())
+		command.Stdout = hostLogger.Original()
+		command.Stderr = hostLogger.Original()
+		if e := command.Run(); e != nil {
+			return fmt.Errorf("execute script error, %w", e)
+		}
+	}
+	return nil
+}
 func (s *TaskStateCommon) executeRemoteScript(ctx context.Context, host *dvmodel.Host, t *task.ScriptTask, hostLogger *log.HostLogger) error {
 	sshClient, err := s.sshService.CreateSshClient(host)
 	if err != nil {

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice"
+	"github.com/MarchGe/go-admin-server/app/common"
 	"github.com/MarchGe/go-admin-server/app/common/E"
 	"github.com/MarchGe/go-admin-server/app/common/R"
 	"github.com/MarchGe/go-admin-server/app/common/constant"
@@ -19,7 +20,6 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"runtime"
 	"slices"
 	"strconv"
 	"time"
@@ -140,7 +140,7 @@ func resizeTTY(ptmx *os.File, wz *WinSize) {
 }
 
 func (a *Xterm) handleConn(conn *websocket.Conn, winSize *WinSize) error {
-	bash, err := getBash()
+	bash, err := common.GetBash()
 	if err != nil {
 		return fmt.Errorf("get bash error, %w", err)
 	}
@@ -249,15 +249,4 @@ func (a *Xterm) handleConnWithSSH(conn *websocket.Conn, winSize *WinSize, host *
 			return fmt.Errorf("write data to ssh stdin error, %w", e)
 		}
 	}
-}
-
-func getBash() (string, error) {
-	unsupportedPlatforms := []string{"windows"} // pty not support windows platform
-	if slices.Contains(unsupportedPlatforms, runtime.GOOS) {
-		return "", fmt.Errorf("unsupported platform: %s", runtime.GOOS)
-	}
-	if _, err := exec.LookPath("bash"); err != nil {
-		return "", fmt.Errorf("bash command not found, %w", err)
-	}
-	return "bash", nil
 }
