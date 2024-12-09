@@ -4,6 +4,7 @@ import (
 	"github.com/MarchGe/go-admin-server/app/common/rabbitmq"
 	"github.com/MarchGe/go-admin-server/app/common/utils/email"
 	"log"
+	"path"
 )
 
 type Config struct {
@@ -21,8 +22,6 @@ type Config struct {
 	Email                EmailConfig     `mapstructure:"email"`
 	RabbitMQ             rabbitmq.Config `mapstructure:"rabbitmq"` // 该配置项没用到，可忽略
 	Grpc                 GrpcConfig      `mapstructure:"grpc"`
-	UploadPkgSizeLimit   int32           `mapstructure:"uploadPkgSizeLimit"`   // 上传的应用部署包的大小限制，单位MB
-	UploadPkgPath        string          `mapstructure:"uploadPkgPath"`        // 应用部署包上传路径，路径分隔符必须是"/"
 	WorkDir              string          `mapstructure:"workDir"`              // 指定工作目录，路径分隔符必须是"/"
 	ScriptExecuteTimeout int32           `mapstructure:"scriptExecuteTimeout"` // 执行script脚本时的超时时间（单位：秒），超过该时间，如果脚本还没执行完，ssh连接将自动断开
 }
@@ -104,6 +103,10 @@ func Setup(c *Config) {
 
 func GetConfig() *Config {
 	return cfg
+}
+
+func (c *Config) GetAppPkgPath() string {
+	return path.Clean(c.WorkDir) + "/data/apps"
 }
 
 func verifyCfg(cfg *Config) {

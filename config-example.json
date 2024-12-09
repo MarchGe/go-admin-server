@@ -54,8 +54,6 @@
     "enable": true,
     "addr": ":15050"
   },
-  "uploadPkgSizeLimit": 500,
-  "uploadPkgPath": "/home/user/pkg",
   "workDir": "./.goadmin",
   "scriptExecuteTimeout": 180
 }

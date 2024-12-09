@@ -102,7 +102,7 @@ func (a *SseApi) pushManifestLog(c *gin.Context, logManager LogManager) {
 	manifestLogger, err := logManager.OpenLatestManifestLogger(id)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			a.sendEvent(c, mtx, sse.Error, "所请求的日志已被清理")
+			a.sendEvent(c, mtx, sse.Error, "所请求的日志不存在或已被清理")
 			return
 		}
 		a.sendEvent(c, mtx, sse.Error, err.Error())
@@ -200,7 +200,7 @@ func (a *SseApi) pushHostLog(c *gin.Context, logManager LogManager) {
 	hostLogger, err := logManager.OpenHostLogger(id, host, hostLogName)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
-			a.sendEvent(c, mtx, sse.Error, "所请求的日志已被清理")
+			a.sendEvent(c, mtx, sse.Error, "所请求的日志不存在或已被清理")
 			return
 		}
 		a.sendEvent(c, mtx, sse.Error, err.Error())

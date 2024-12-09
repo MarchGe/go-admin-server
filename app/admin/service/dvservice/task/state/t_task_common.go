@@ -152,7 +152,11 @@ func (s *TaskStateCommon) Delete(ctx context.Context, t *task.ScriptTask) error 
 		}
 		return tx.Delete(&task.ScriptTask{}, t.Id).Error
 	})
-	return err
+	if err != nil {
+		return err
+	}
+	go s.logManager.RemoveLogs(t.Id)
+	return nil
 }
 
 func (s *TaskStateCommon) updateStatus(id int64, status task.Status) error {

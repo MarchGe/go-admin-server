@@ -195,7 +195,7 @@ func (s *DeployTaskService) getRelationData(deployTask *task.DeployTask) (*dvmod
 }
 
 func (s *DeployTaskService) batchDeploy(ctx context.Context, t *task.Task, remoteRoot string, app *dvmodel.App, hostList []*dvmodel.Host, script *dvmodel.Script) error {
-	localRoot := path.Clean(config.GetConfig().UploadPkgPath)
+	localRoot := path.Clean(config.GetConfig().GetAppPkgPath())
 	localPath := localRoot + "/" + app.Key
 	manifestLogger, err := s.logManager.CreateManifestLogger(t.Id)
 	if err != nil {

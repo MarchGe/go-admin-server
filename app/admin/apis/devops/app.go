@@ -146,10 +146,6 @@ func (a *AppApi) UploadPkg(c *gin.Context) {
 	}
 	cfg := config.GetConfig()
 	slog.Debug("upload file", slog.String("size", fmt.Sprintf("%d bytes", file.Size)))
-	if file.Size > int64(cfg.UploadPkgSizeLimit)*1024*1024 {
-		R.Fail(c, fmt.Sprintf("文件大小不能超过%dMB", cfg.UploadPkgSizeLimit), http.StatusBadRequest)
-		return
-	}
 	uploadTmpDir := a.appService.GetUploadTmpDir(cfg.WorkDir)
 	userId := c.GetInt64(constant.SessionUserId)
 	tmpKey := a.getPkgTmpKey(userId, file.Filename)
@@ -192,7 +188,7 @@ func (a *AppApi) DownloadPkg(c *gin.Context) {
 		index := strings.LastIndex(key, "/")
 		fileName = key[index+1:]
 	}
-	uploadRoot := path.Clean(config.GetConfig().UploadPkgPath)
+	uploadRoot := path.Clean(config.GetConfig().GetAppPkgPath())
 	filePath := uploadRoot + "/" + key
 	c.Writer.Header().Add("Content-Type", "application/octet-stream")
 	c.Writer.Header().Set("Content-Disposition", "attachment; filename="+fileName)
