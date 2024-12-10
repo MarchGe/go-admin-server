@@ -46,7 +46,7 @@ func CreateNacoser(cfg *Config) *Nacoser {
 	}
 }
 
-func (n *Nacoser) GetConfig() string {
+func (n *Nacoser) GetConfig() (config string, formatType string) {
 	configParam := vo.ConfigParam{
 		DataId: n.cfg.DataId,
 		Group:  n.cfg.Group,
@@ -57,7 +57,7 @@ func (n *Nacoser) GetConfig() string {
 	if err != nil {
 		log.Panicf("nacos get config error: %v", err)
 	}
-	return stringConfig
+	return stringConfig, n.cfg.Type
 }
 
 func (n *Nacoser) RegisterService(listenAddr string) error { // 备注：非nacos超级用户向public默认命名空间中注册临时服务，会报授权失败，可能是nacos-sdk-go v2.2.5 或 nacos-server v2.1.2中有bug
@@ -176,4 +176,9 @@ func (n *Nacoser) parseHostAndPort(listenAddr string) {
 	}
 	n.serviceHost = host
 	n.servicePort = uint64(port)
+}
+
+func (n *Nacoser) Close() {
+	n.configClient.CloseClient()
+	n.namingClient.CloseClient()
 }

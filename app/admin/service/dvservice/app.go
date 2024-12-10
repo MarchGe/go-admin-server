@@ -55,7 +55,7 @@ func (s *AppService) GetUploadTmpDir(workDir string) string {
 func (s *AppService) moveTmpPkg(tmpKey, key string) error {
 	cfg := config.GetConfig()
 	tmpFile := s.GetUploadTmpDir(cfg.WorkDir) + "/" + tmpKey
-	pkgFile := path.Clean(cfg.UploadPkgPath) + "/" + key
+	pkgFile := path.Clean(cfg.GetAppPkgPath()) + "/" + key
 	if err := os.MkdirAll(path.Dir(pkgFile), 0755); err != nil {
 		return fmt.Errorf("create directory %s error, %w", path.Dir(pkgFile), err)
 	}
@@ -67,8 +67,8 @@ func (s *AppService) moveTmpPkg(tmpKey, key string) error {
 
 func (s *AppService) movePkg(oldKey, newKey string) error {
 	cfg := config.GetConfig()
-	oldFile := path.Clean(cfg.UploadPkgPath) + "/" + oldKey
-	newFile := path.Clean(cfg.UploadPkgPath) + "/" + newKey
+	oldFile := path.Clean(cfg.GetAppPkgPath()) + "/" + oldKey
+	newFile := path.Clean(cfg.GetAppPkgPath()) + "/" + newKey
 	if err := os.MkdirAll(path.Dir(newFile), 0755); err != nil {
 		return fmt.Errorf("create directory %s error, %w", path.Dir(newFile), err)
 	}
@@ -193,7 +193,7 @@ func (s *AppService) removeOldPkg(oldKey string) {
 	if oldKey == "" {
 		return
 	}
-	uploadRoot := path.Clean(config.GetConfig().UploadPkgPath)
+	uploadRoot := path.Clean(config.GetConfig().GetAppPkgPath())
 	filePath := uploadRoot + "/" + oldKey
 	if err := os.Remove(filePath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		slog.Error("delete file error", slog.String("file", filePath), slog.Any("err", err))

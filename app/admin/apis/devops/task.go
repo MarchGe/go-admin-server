@@ -2,7 +2,7 @@ package devops
 
 import (
 	"errors"
-	_ "github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
+	_ "github.com/MarchGe/go-admin-server/app/admin/model/dvmodel/task"
 	_ "github.com/MarchGe/go-admin-server/app/admin/service/dto/res"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/req"
 	_ "github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/res"
@@ -102,7 +102,7 @@ func (a *TaskApi) DeleteTask(c *gin.Context) {
 //	@Param		keyword		query		string	false	"按照名称模糊搜索"
 //	@Param		page		query		int64	false	"页码"
 //	@Param		pageSize	query		int64	false	"每页查询条数"
-//	@Success	200			{object}	R.Result{value=res.PageableData[dvmodel.Task]}
+//	@Success	200			{object}	R.Result{value=res.PageableData[task.Task]}
 //	@Router		/devops/task/list [get]
 func (a *TaskApi) GetList(c *gin.Context) {
 	keyword := ginUtils.GetStringQuery(c, "keyword", "")
