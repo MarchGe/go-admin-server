@@ -1820,7 +1820,7 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "value": {
-                                            "$ref": "#/definitions/res.PageableData-dvmodel_Script"
+                                            "$ref": "#/definitions/res.PageableData-res_ScriptRes"
                                         }
                                     }
                                 }
@@ -4920,20 +4920,6 @@ const docTemplate = `{
                 }
             }
         },
-        "res.PageableData-dvmodel_Script": {
-            "type": "object",
-            "properties": {
-                "list": {
-                    "type": "array",
-                    "items": {
-                        "$ref": "#/definitions/dvmodel.Script"
-                    }
-                },
-                "total": {
-                    "type": "integer"
-                }
-            }
-        },
         "res.PageableData-model_ExceptionLog": {
             "type": "object",
             "properties": {
@@ -5046,6 +5032,20 @@ const docTemplate = `{
                 }
             }
         },
+        "res.PageableData-res_ScriptRes": {
+            "type": "object",
+            "properties": {
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/res.ScriptRes"
+                    }
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
         "res.PageableData-task_ScriptTask": {
             "type": "object",
             "properties": {
@@ -5071,6 +5071,38 @@ const docTemplate = `{
                 },
                 "total": {
                     "type": "integer"
+                }
+            }
+        },
+        "res.ScriptRes": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "createTime": {
+                    "type": "string"
+                },
+                "deployTaskRefCount": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "scriptTaskRefCount": {
+                    "type": "integer"
+                },
+                "updateTime": {
+                    "type": "string"
+                },
+                "version": {
+                    "type": "string"
                 }
             }
         },

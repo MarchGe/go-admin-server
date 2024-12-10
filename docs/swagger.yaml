@@ -819,15 +819,6 @@ definitions:
       total:
         type: integer
     type: object
-  res.PageableData-dvmodel_Script:
-    properties:
-      list:
-        items:
-          $ref: '#/definitions/dvmodel.Script'
-        type: array
-      total:
-        type: integer
-    type: object
   res.PageableData-model_ExceptionLog:
     properties:
       list:
@@ -900,6 +891,15 @@ definitions:
       total:
         type: integer
     type: object
+  res.PageableData-res_ScriptRes:
+    properties:
+      list:
+        items:
+          $ref: '#/definitions/res.ScriptRes'
+        type: array
+      total:
+        type: integer
+    type: object
   res.PageableData-task_ScriptTask:
     properties:
       list:
@@ -917,6 +917,27 @@ definitions:
         type: array
       total:
         type: integer
+    type: object
+  res.ScriptRes:
+    properties:
+      content:
+        type: string
+      createTime:
+        type: string
+      deployTaskRefCount:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      scriptTaskRefCount:
+        type: integer
+      updateTime:
+        type: string
+      version:
+        type: string
     type: object
   res.UploadRes:
     properties:
@@ -2167,7 +2188,7 @@ paths:
             - $ref: '#/definitions/R.Result'
             - properties:
                 value:
-                  $ref: '#/definitions/res.PageableData-dvmodel_Script'
+                  $ref: '#/definitions/res.PageableData-res_ScriptRes'
               type: object
       summary: 查询脚本列表
       tags:
