@@ -18,4 +18,6 @@ func registerSseRoutes(g *gin.RouterGroup) {
 	rg.GET("/message-push", a.MessagePush)
 	rg.GET("/task/:id/manifest-log", authz.RequiresPermissions("task:log"), a.PushManifestLogEvent)
 	rg.GET("/task/:id/host-log", authz.RequiresPermissions("task:log"), a.PushHostLogEvent)
+	rg.GET("/script-task/:id/manifest-log", authz.RequiresPermissions("scriptTask:log"), a.PushScriptTaskManifestLog)
+	rg.GET("/script-task/:id/host-log", authz.RequiresPermissions("scriptTask:log"), a.PushScriptTaskHostLogEvent)
 }

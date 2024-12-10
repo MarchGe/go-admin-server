@@ -104,7 +104,7 @@ func (a *ScriptApi) DeleteScript(c *gin.Context) {
 //	@Param		keyword		query		string	false	"按照名称模糊搜索"
 //	@Param		page		query		int64	false	"页码"
 //	@Param		pageSize	query		int64	false	"每页查询条数"
-//	@Success	200			{object}	R.Result{value=res.PageableData[dvmodel.Script]}
+//	@Success	200			{object}	R.Result{value=res.PageableData[res.ScriptRes]}
 //	@Router		/devops/script/list [get]
 func (a *ScriptApi) GetList(c *gin.Context) {
 	keyword := ginUtils.GetStringQuery(c, "keyword", "")

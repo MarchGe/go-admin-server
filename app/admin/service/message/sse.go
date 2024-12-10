@@ -2,6 +2,7 @@ package message
 
 import (
 	"fmt"
+	cSse "github.com/MarchGe/go-admin-server/app/common/constant/sse"
 	"github.com/gin-contrib/sse"
 	"github.com/gin-gonic/gin"
 	"log/slog"
@@ -22,13 +23,13 @@ type Event string
 var sseSessions = make([]*sseSession, 0)
 var mtx = sync.RWMutex{}
 
-func (s *SseService) PushEventMessage(uId int64, event Event, data any) error {
+func (s *SseService) PushEventMessage(uId int64, event cSse.Event, data any) error {
 	sessions := s.getSessions(uId)
 	for i := range sessions {
 		resMtx := sessions[i].Mtx
 		resMtx.Lock()
 		err := sse.Encode(sessions[i].W, sse.Event{
-			Event: string(event),
+			Event: event.String(),
 			Data:  data,
 		})
 		if err != nil {

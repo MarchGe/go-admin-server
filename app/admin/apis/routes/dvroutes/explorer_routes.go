@@ -18,8 +18,8 @@ func registerExplorerRoutes(g *gin.RouterGroup) {
 
 	rg.DELETE("/entry", authz.RequiresPermissions("explorer:delete"), recorder.RecordOpLog("资源管理器资源"), a.DeleteEntry)
 	rg.GET("/entries", authz.RequiresPermissions("explorer:entries"), a.GetEntries)
-	rg.POST("/upload", authz.RequiresPermissions("explorer:upload"), a.Upload)
+	rg.POST("/upload", authz.RequiresPermissions("explorer:upload"), recorder.RecordOpLog("资源管理器资源", "上传文件"), a.Upload)
 	rg.GET("/download", authz.RequiresPermissions("explorer:download"), a.Download)
-	rg.POST("/create", authz.RequiresPermissions("explorer:create"), a.CreateDir)
-	rg.POST("/rename", authz.RequiresPermissions("explorer:rename"), a.Rename)
+	rg.POST("/create", authz.RequiresPermissions("explorer:create"), recorder.RecordOpLog("资源管理器资源", "创建目录"), a.CreateDir)
+	rg.POST("/rename", authz.RequiresPermissions("explorer:rename"), recorder.RecordOpLog("资源管理器资源", "重命名"), a.Rename)
 }

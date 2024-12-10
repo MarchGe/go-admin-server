@@ -3,6 +3,7 @@ package auto_migrate
 import (
 	"github.com/MarchGe/go-admin-server/app/admin/model"
 	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
+	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel/task"
 	"gorm.io/gorm"
 )
 
@@ -24,11 +25,13 @@ func TableAutoMigrate(db *gorm.DB) error {
 		&model.UserMenu{},
 		&model.UserPassword{},
 		&dvmodel.App{},
-		&dvmodel.DeployTask{},
+		&task.DeployTask{},
 		&dvmodel.Group{},
 		&dvmodel.Host{},
 		&dvmodel.HostGroup{},
 		&dvmodel.Script{},
-		&dvmodel.Task{},
+		&task.Task{},
+		&task.ScriptTask{},
+		&task.ScriptTaskScript{},
 	)
 }

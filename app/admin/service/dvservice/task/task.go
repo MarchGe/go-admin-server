@@ -3,7 +3,7 @@ package task
 import (
 	"context"
 	"errors"
-	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel"
+	"github.com/MarchGe/go-admin-server/app/admin/model/dvmodel/task"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dto/res"
 	"github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/req"
 	dvRes "github.com/MarchGe/go-admin-server/app/admin/service/dvservice/dto/res"
@@ -24,11 +24,11 @@ func GetTaskService() *TaskService {
 
 func (s *TaskService) CreateTask(info *req.TaskUpsertReq) error {
 	t := s.toModel(info)
-	t.Status = int8(dvmodel.TaskStatusNotRunning)
+	t.Status = task.StatusNotRunning
 	t.CreateTime = time.Now()
 	t.UpdateTime = time.Now()
 	err := database.GetMysql().Transaction(func(tx *gorm.DB) error {
-		taskType := dvmodel.TaskType(t.Type)
+		taskType := t.Type
 		id, err := Select(taskType).Create(tx, info.Concrete)
 		if err != nil {
 			return err
@@ -40,8 +40,8 @@ func (s *TaskService) CreateTask(info *req.TaskUpsertReq) error {
 	return err
 }
 
-func (s *TaskService) toModel(info *req.TaskUpsertReq) *dvmodel.Task {
-	return &dvmodel.Task{
+func (s *TaskService) toModel(info *req.TaskUpsertReq) *task.Task {
+	return &task.Task{
 		Name:        info.Name,
 		Type:        info.Type,
 		Cron:        info.Cron,
@@ -54,13 +54,13 @@ func (s *TaskService) UpdateTask(id int64, info *req.TaskUpsertReq) error {
 	if err != nil {
 		return err
 	}
-	if t.Status == int8(dvmodel.TaskStatusRunning) {
+	if t.Status == task.StatusRunning {
 		return E.Message("已启动的任务，不允许修改")
 	}
 	s.copyProperties(info, t)
 	t.UpdateTime = time.Now()
 	err = database.GetMysql().Transaction(func(tx *gorm.DB) error {
-		taskType := dvmodel.TaskType(t.Type)
+		taskType := t.Type
 		if err = Select(taskType).Update(tx, info.Concrete, t.AssociationID); err != nil {
 			return err
 		}
@@ -69,8 +69,8 @@ func (s *TaskService) UpdateTask(id int64, info *req.TaskUpsertReq) error {
 	return err
 }
 
-func (s *TaskService) FindOneById(id int64) (*dvmodel.Task, error) {
-	m := &dvmodel.Task{}
+func (s *TaskService) FindOneById(id int64) (*task.Task, error) {
+	m := &task.Task{}
 	err := database.GetMysql().First(m, id).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -82,7 +82,7 @@ func (s *TaskService) FindOneById(id int64) (*dvmodel.Task, error) {
 	return m, nil
 }
 
-func (s *TaskService) copyProperties(info *req.TaskUpsertReq, task *dvmodel.Task) {
+func (s *TaskService) copyProperties(info *req.TaskUpsertReq, task *task.Task) {
 	task.Name = info.Name
 	task.Type = info.Type
 	task.Cron = info.Cron
@@ -95,18 +95,18 @@ func (s *TaskService) DeleteTask(id int64) error {
 		return err
 	}
 	err = database.GetMysql().Transaction(func(tx *gorm.DB) error {
-		if err = Select(dvmodel.TaskType(t.Type)).Delete(tx, t); err != nil {
+		if err = Select(t.Type).Delete(tx, t); err != nil {
 			return err
 		}
-		return tx.Delete(&dvmodel.Task{}, id).Error
+		return tx.Delete(&task.Task{}, id).Error
 	})
 	return err
 }
 
 func (s *TaskService) PageList(keyword string, page, pageSize int) (*res.PageableData[*dvRes.TaskRes], error) {
-	tasks := make([]*dvmodel.Task, 0)
+	tasks := make([]*task.Task, 0)
 	pageableData := &res.PageableData[*dvRes.TaskRes]{}
-	db := database.GetMysql().Model(&dvmodel.Task{})
+	db := database.GetMysql().Model(&task.Task{})
 	if keyword != "" {
 		db.Where("name like ?", "%"+keyword+"%")
 	}
@@ -121,13 +121,13 @@ func (s *TaskService) PageList(keyword string, page, pageSize int) (*res.Pageabl
 	return pageableData, nil
 }
 
-func (s *TaskService) attachConcreteTask(tasks []*dvmodel.Task) []*dvRes.TaskRes {
+func (s *TaskService) attachConcreteTask(tasks []*task.Task) []*dvRes.TaskRes {
 	taskRes := make([]*dvRes.TaskRes, len(tasks))
 	for i := range tasks {
 		t := &dvRes.TaskRes{
 			Task: tasks[i],
 		}
-		t.Concrete, _ = Select(dvmodel.TaskType(tasks[i].Type)).FindOneById(tasks[i].AssociationID)
+		t.Concrete, _ = Select(tasks[i].Type).FindOneById(tasks[i].AssociationID)
 		taskRes[i] = t
 	}
 	return taskRes
@@ -138,13 +138,13 @@ func (s *TaskService) StartTask(uId, id int64) error {
 	if err != nil {
 		return err
 	}
-	if t.Status == int8(dvmodel.TaskStatusRunning) {
+	if t.Status == task.StatusRunning {
 		return E.Message("当前任务已经启动了")
 	}
 	parentCtx := context.WithValue(context.Background(), "uId", uId)
 	ctx, cancel := context.WithCancel(parentCtx)
 	defer cancel()
-	return Select(dvmodel.TaskType(t.Type)).Start(ctx, t)
+	return Select(t.Type).Start(ctx, t)
 }
 
 func (s *TaskService) StopTask(id int64) error {
@@ -154,5 +154,5 @@ func (s *TaskService) StopTask(id int64) error {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	return Select(dvmodel.TaskType(t.Type)).Stop(ctx, t)
+	return Select(t.Type).Stop(ctx, t)
 }
