@@ -1,12 +1,11 @@
 package middleware
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/MarchGe/go-admin-server/app/common/constant"
+	"github.com/MarchGe/go-admin-server/app/common/middleware/recorder"
 	"github.com/gin-gonic/gin"
 	"github.com/gobwas/glob"
-	"io"
 	"log/slog"
 	"path"
 	"time"
@@ -19,30 +18,34 @@ func initDebugPatterns(contextPath string) {
 		contextPath + constant.Swagger + "/**",
 		contextPath + "/terminal/ws",
 		contextPath + "/terminal/ws/ssh/*",
-		contextPath + "/devops/app/upload",
-		contextPath + "/devops/explorer/upload",
 	}
 }
 
 func ApiDebugLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if ignoredDebug(c.Request.URL.Path) {
+			slog.Debug("==> Request info: ", slog.String("url", c.Request.URL.String()))
 			c.Next()
 			return
 		}
 		start := time.Now()
-		requestBodyBytes, _ := io.ReadAll(c.Request.Body)
-		c.Request.Body = io.NopCloser(bytes.NewReader(requestBodyBytes))
+		requestBodyBytes, bodyIgnored := recorder.GetBodyContent(c)
 		c.Next()
 		end := time.Now()
 		delay := end.Sub(start)
-		slog.Debug("RestApiInOutParameters",
+		var bodyLogAttr slog.Attr
+		if bodyIgnored {
+			bodyLogAttr = slog.Bool("bodyIgnored", true)
+		} else {
+			bodyLogAttr = slog.String("requestBody", string(requestBodyBytes))
+		}
+		slog.Debug("==> Request info: ",
 			slog.String("requestId", c.GetString(constant.RequestId)),
 			slog.String("clientIp", c.ClientIP()),
 			slog.String("method", c.Request.Method),
 			slog.String("path", c.Request.URL.Path),
 			slog.Any("query", c.Request.URL.Query()),
-			slog.String("requestBody", string(requestBodyBytes)),
+			bodyLogAttr,
 			slog.Duration("duration", delay),
 		)
 	}
