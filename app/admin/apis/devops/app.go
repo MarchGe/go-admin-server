@@ -140,6 +140,7 @@ func (a *AppApi) UploadPkg(c *gin.Context) {
 	if err != nil {
 		E.PanicErr(err)
 	}
+	file.Filename = CleanFilename(file.Filename)
 	if len([]rune(file.Filename)) > req.AppPkgFileNameMaxLength {
 		R.Fail(c, "文件名太长", http.StatusBadRequest)
 		return

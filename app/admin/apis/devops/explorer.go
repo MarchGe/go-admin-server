@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"regexp"
 	"sort"
 	"strings"
 )
@@ -74,6 +75,27 @@ func (a *ExplorerApi) DeleteEntry(c *gin.Context) {
 	R.Success(c, nil)
 }
 
+func FilenameCheck(filename string) error {
+	rgx := regexp.MustCompile("[^\\w.\\-@~]")
+	invalidStr := rgx.FindString(filename)
+	if invalidStr == "" {
+		if strings.HasPrefix(filename, "-") {
+			return E.Message("文件名不能以\"-\"开头")
+		}
+		return nil
+	}
+	return E.Message("不能包含特殊字符: " + invalidStr)
+}
+
+func CleanFilename(filename string) string {
+	rgx := regexp.MustCompile("[^\\w.\\-@~]")
+	result := rgx.ReplaceAllString(filename, "_")
+	if strings.HasPrefix(filename, "-") {
+		result = strings.Replace(result, "-", "_", 1)
+	}
+	return result
+}
+
 // Upload godoc
 //
 //	@Summary	上传文件
@@ -94,6 +116,7 @@ func (a *ExplorerApi) Upload(c *gin.Context) {
 	if err != nil {
 		E.PanicErr(err)
 	}
+	file.Filename = CleanFilename(file.Filename)
 	filePath := path.Clean(dir) + "/" + file.Filename
 	if err = c.SaveUploadedFile(file, filePath); err != nil {
 		if errors.Is(err, os.ErrPermission) {
@@ -177,6 +200,9 @@ func (a *ExplorerApi) CreateDir(c *gin.Context) {
 func (a *ExplorerApi) Rename(c *gin.Context) {
 	var body req.ExplorerRenameReq
 	if err := c.ShouldBindJSON(&body); err != nil {
+		E.PanicErr(err)
+	}
+	if err := FilenameCheck(body.NewName); err != nil {
 		E.PanicErr(err)
 	}
 	oldPath := path.Clean(body.Dir + "/" + body.OldName)
