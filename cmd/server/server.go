@@ -303,7 +303,7 @@ func getEngine() *gin.Engine {
 	engine := gin.New()
 
 	engine.
-		Use(middleware.ApiDebugLogger()).
+		//Use(middleware.ApiDebugLogger()).
 		Use(middleware.GlobalErrHandler()).
 		Use(middleware.SetRequestId()).
 		Use(middleware.SetSession(&cfg.Cookie)).

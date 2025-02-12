@@ -113,6 +113,7 @@ func (a *ExplorerSftpApi) Upload(c *gin.Context) {
 	if err != nil {
 		E.PanicErr(err)
 	}
+	file.Filename = CleanFilename(file.Filename)
 	sHostId := c.PostForm("hostId")
 	hostId, err := strconv.Atoi(sHostId)
 	if err != nil {
@@ -210,6 +211,9 @@ func (a *ExplorerSftpApi) CreateDir(c *gin.Context) {
 func (a *ExplorerSftpApi) Rename(c *gin.Context) {
 	var body req.SftpRenameReq
 	if err := c.ShouldBindJSON(&body); err != nil {
+		E.PanicErr(err)
+	}
+	if err := FilenameCheck(body.NewName); err != nil {
 		E.PanicErr(err)
 	}
 	host := a.getHost(body.HostId)
