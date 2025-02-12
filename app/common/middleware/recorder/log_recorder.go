@@ -13,9 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"io"
 	"log/slog"
+	"strconv"
 	"strings"
 	"time"
 )
+
+var logContentExceedLimit = 1024
 
 func RecordLoginLog(c *gin.Context, userId int64) {
 	if !config.GetConfig().Log.LoginLog {
@@ -86,12 +89,23 @@ func RecordOpLog(opTarget string, v ...any) gin.HandlerFunc {
 			log.Body = "[private]"
 		} else {
 			log.Query = c.Request.URL.Query().Encode()
-			if len(log.Query) > 255 {
+			if len(log.Query) > logContentExceedLimit {
 				log.Query = "[too long ignored]"
 			}
-			log.Body = getBodyParams(c)
-			if len(log.Body) > 500 {
+			contentLengthStr := c.GetHeader("Content-Length")
+			var contentLength int
+			if contentLengthStr != "" {
+				contentLength, _ = strconv.Atoi(contentLengthStr)
+			}
+			if contentLength > logContentExceedLimit {
 				log.Body = "[too long ignored]"
+			} else {
+				body, ignored := GetBodyContent(c)
+				if ignored {
+					log.Body = "[ignored]"
+				} else {
+					log.Body = string(body)
+				}
 			}
 		}
 		log.CreateTime = time.Now()
@@ -124,12 +138,23 @@ func RecordExceptionLog(c *gin.Context, errString string) {
 	}
 	log.Path = c.Request.URL.Path
 	log.Query = c.Request.URL.Query().Encode()
-	if len(log.Query) > 255 {
+	if len(log.Query) > logContentExceedLimit {
 		log.Query = "[too long ignored]"
 	}
-	log.Body = getBodyParams(c)
-	if len(log.Body) > 500 {
+	contentLengthStr := c.GetHeader("Content-Length")
+	var contentLength int
+	if contentLengthStr != "" {
+		contentLength, _ = strconv.Atoi(contentLengthStr)
+	}
+	if contentLength > logContentExceedLimit {
 		log.Body = "[too long ignored]"
+	} else {
+		body, ignored := GetBodyContent(c)
+		if ignored {
+			log.Body = "[ignored]"
+		} else {
+			log.Body = string(body)
+		}
 	}
 	log.Error = errString
 	log.CreateTime = time.Now()
@@ -139,10 +164,19 @@ func RecordExceptionLog(c *gin.Context, errString string) {
 	}
 }
 
-func getBodyParams(c *gin.Context) string {
-	requestBodyBytes, _ := io.ReadAll(c.Request.Body)
-	c.Request.Body = io.NopCloser(bytes.NewReader(requestBodyBytes))
-	return string(requestBodyBytes)
+func GetBodyContent(c *gin.Context) (body []byte, bodyIgnored bool) {
+	contentType := c.GetHeader("Content-Type")
+	var requestBodyBytes []byte
+	var ignoreBody = true
+	if strings.Contains(contentType, "application/json") || strings.Contains(contentType, "application/x-www-form-urlencoded") || strings.Contains(contentType, "text/plain") {
+		requestBodyBytes, _ = io.ReadAll(c.Request.Body)
+		c.Request.Body = io.NopCloser(bytes.NewReader(requestBodyBytes))
+		ignoreBody = false
+	}
+	if ignoreBody {
+		return nil, true
+	}
+	return requestBodyBytes, false
 }
 
 func parseMethod(method string) string {
