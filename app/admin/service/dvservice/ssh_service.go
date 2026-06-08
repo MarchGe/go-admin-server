@@ -25,6 +25,7 @@ func (s *SshService) CreateSshClient(host *dvmodel.Host) (*ssh.Client, error) {
 	if err != nil {
 		return nil, fmt.Errorf("decrypt password error, %w", err)
 	}
+
 	clientConfig := ssh.ClientConfig{
 		User: host.User,
 		Auth: []ssh.AuthMethod{
@@ -33,10 +34,12 @@ func (s *SshService) CreateSshClient(host *dvmodel.Host) (*ssh.Client, error) {
 		Timeout:         constant.SshEstablishTimeoutInSeconds * time.Second,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
+
 	addr := fmt.Sprintf("%s:%d", host.Ip, host.Port)
 	client, err := ssh.Dial("tcp", addr, &clientConfig)
 	if err != nil {
 		return nil, fmt.Errorf("ssh connect failed, %w", err)
 	}
+
 	return client, nil
 }

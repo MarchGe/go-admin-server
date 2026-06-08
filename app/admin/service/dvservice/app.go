@@ -31,9 +31,11 @@ func (s *AppService) CreateApp(info *req.AppUpsertReq) error {
 	if existApp != nil {
 		return E.Message(fmt.Sprintf("应用'%s:%s'已存在", info.Name, info.Version))
 	}
+
 	app := s.toModel(info)
 	app.CreateTime = time.Now()
 	app.UpdateTime = time.Now()
+
 	err := database.GetMysql().Transaction(func(tx *gorm.DB) error {
 		app.Key = s.getPkgKey(info.Name, info.Version, info.FileName)
 		if err := tx.Save(app).Error; err != nil {
@@ -41,6 +43,7 @@ func (s *AppService) CreateApp(info *req.AppUpsertReq) error {
 		}
 		return s.moveTmpPkg(info.Key, app.Key)
 	})
+
 	return err
 }
 
@@ -56,12 +59,15 @@ func (s *AppService) moveTmpPkg(tmpKey, key string) error {
 	cfg := config.GetConfig()
 	tmpFile := s.GetUploadTmpDir(cfg.WorkDir) + "/" + tmpKey
 	pkgFile := path.Clean(cfg.GetAppPkgPath()) + "/" + key
+
 	if err := os.MkdirAll(path.Dir(pkgFile), 0755); err != nil {
 		return fmt.Errorf("create directory %s error, %w", path.Dir(pkgFile), err)
 	}
+
 	if err := os.Rename(tmpFile, pkgFile); err != nil {
 		return fmt.Errorf("move file from %s to %s error, %w", tmpFile, pkgFile, err)
 	}
+
 	return nil
 }
 
@@ -69,12 +75,15 @@ func (s *AppService) movePkg(oldKey, newKey string) error {
 	cfg := config.GetConfig()
 	oldFile := path.Clean(cfg.GetAppPkgPath()) + "/" + oldKey
 	newFile := path.Clean(cfg.GetAppPkgPath()) + "/" + newKey
+
 	if err := os.MkdirAll(path.Dir(newFile), 0755); err != nil {
 		return fmt.Errorf("create directory %s error, %w", path.Dir(newFile), err)
 	}
+
 	if err := os.Rename(oldFile, newFile); err != nil {
 		return fmt.Errorf("move file from %s to %s error, %w", oldFile, newFile, err)
 	}
+
 	s.removeOldPkg(oldKey)
 	return nil
 }
@@ -94,18 +103,22 @@ func (s *AppService) UpdateApp(id int64, info *req.AppUpsertReq) error {
 	if app == nil {
 		return E.Message("操作的应用不存在")
 	}
+
 	oldKey := app.Key
 	existApp, _ := s.FindOneByNameAndVersion(info.Name, info.Version)
 	if existApp != nil && existApp.Id != id {
 		return E.Message(fmt.Sprintf("应用'%s:%s'已存在", info.Name, info.Version))
 	}
+
 	s.copyProperties(info, app)
 	app.UpdateTime = time.Now()
 	app.Key = s.getPkgKey(app.Name, app.Version, app.FileName)
+
 	err := database.GetMysql().Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(app).Error; err != nil {
 			return err
 		}
+
 		if info.Key != oldKey { // 上传了新的部署包
 			if err := s.moveTmpPkg(info.Key, app.Key); err != nil {
 				return err
@@ -118,8 +131,10 @@ func (s *AppService) UpdateApp(id int64, info *req.AppUpsertReq) error {
 				return err
 			}
 		}
+
 		return nil
 	})
+
 	return err
 }
 
@@ -133,6 +148,7 @@ func (s *AppService) FindOneById(id int64) (*dvmodel.App, error) {
 			return nil, err
 		}
 	}
+
 	return m, nil
 }
 
@@ -149,6 +165,7 @@ func (s *AppService) DeleteApp(id int64) error {
 	if app == nil {
 		return E.Message("操作的应用不存在")
 	}
+
 	err := database.GetMysql().Transaction(func(tx *gorm.DB) error {
 		if err := tx.Delete(&dvmodel.App{}, id).Error; err != nil {
 			return err
@@ -156,6 +173,7 @@ func (s *AppService) DeleteApp(id int64) error {
 		s.removeOldPkg(app.Key)
 		return nil
 	})
+
 	return err
 }
 
@@ -163,16 +181,20 @@ func (s *AppService) PageList(keyword string, page, pageSize int) (*res.Pageable
 	apps := make([]*dvmodel.App, 0)
 	pageableData := &res.PageableData[*dvmodel.App]{}
 	db := database.GetMysql().Model(&dvmodel.App{})
+
 	if keyword != "" {
 		db.Where("name like ?", "%"+keyword+"%")
 	}
+
 	var count int64
 	err := db.Count(&count).Order("create_time desc").Offset(pageSize * (page - 1)).Limit(pageSize).Find(&apps).Error
 	if err != nil {
 		return nil, err
 	}
+
 	pageableData.List = apps
 	pageableData.Total = count
+
 	return pageableData, nil
 }
 
@@ -186,6 +208,7 @@ func (s *AppService) FindOneByNameAndVersion(name, version string) (*dvmodel.App
 			return nil, err
 		}
 	}
+
 	return m, nil
 }
 
@@ -193,13 +216,17 @@ func (s *AppService) removeOldPkg(oldKey string) {
 	if oldKey == "" {
 		return
 	}
+
 	uploadRoot := path.Clean(config.GetConfig().GetAppPkgPath())
 	filePath := uploadRoot + "/" + oldKey
+
 	if err := os.Remove(filePath); err != nil && !errors.Is(err, os.ErrNotExist) {
 		slog.Error("delete file error", slog.String("file", filePath), slog.Any("err", err))
 	}
+
 	keyLevels := len(strings.Split(oldKey, "/")) - 1
 	loopPath := filePath
+
 	for i := 0; i < keyLevels; i++ { // 循环，判断是否需要删除上层目录
 		loopPath = path.Dir(loopPath)
 		entries, e := os.ReadDir(loopPath)

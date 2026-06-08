@@ -28,6 +28,7 @@ func ApiDebugLogger() gin.HandlerFunc {
 			c.Next()
 			return
 		}
+
 		start := time.Now()
 		requestBodyBytes, bodyIgnored := recorder.GetBodyContent(c)
 		c.Next()
@@ -39,6 +40,7 @@ func ApiDebugLogger() gin.HandlerFunc {
 		} else {
 			bodyLogAttr = slog.String("requestBody", string(requestBodyBytes))
 		}
+
 		slog.Debug("==> Request info: ",
 			slog.String("requestId", c.GetString(constant.RequestId)),
 			slog.String("clientIp", c.ClientIP()),

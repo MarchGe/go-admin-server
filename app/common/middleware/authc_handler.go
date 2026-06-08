@@ -24,10 +24,12 @@ func Initialize(contextPath string) {
 		contextPath + "/auth/login",
 		contextPath + "/swagger/**",
 	}
+
 	websocketPatterns = []string{
 		contextPath + "/terminal/ws",
 		contextPath + "/terminal/ws/ssh/*",
 	}
+
 	initDebugPatterns(contextPath)
 }
 
@@ -52,6 +54,7 @@ func AuthenticationHandler() gin.HandlerFunc {
 					}
 				}
 			}
+
 			session := sessions.DefaultMany(c, constant.LoginSession)
 			userId := session.Get(constant.SessionUserId)
 			if userId == nil {
@@ -62,6 +65,7 @@ func AuthenticationHandler() gin.HandlerFunc {
 				}
 				return
 			}
+
 			c.Set(constant.SessionUserId, userId)
 			c.Set(constant.IsRootUser, session.Get(constant.IsRootUser))
 			c.Next()
@@ -75,6 +79,7 @@ func ignored(requestPath string) bool {
 		if err != nil {
 			panic(fmt.Errorf("pattern '%s' compile error: %w", pattern, err))
 		}
+
 		if g.Match(path.Clean(requestPath)) {
 			return true
 		}
@@ -92,5 +97,6 @@ func isWebsocket(requestPath string) bool {
 			return true
 		}
 	}
+
 	return false
 }

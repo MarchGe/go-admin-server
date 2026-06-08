@@ -41,11 +41,13 @@ func createTranslator() ut.Translator {
 	if !found {
 		panic(errors.New("uniTranslator.GetTranslator(\"zh\") failed"))
 	}
+
 	v := ginUtils.GetValidator().V
 	err := zh2.RegisterDefaultTranslations(v, utTranslator)
 	if err != nil {
 		panic(err)
 	}
+
 	registerRegexTranslator(v, utTranslator)
 	return utTranslator
 }
@@ -71,6 +73,7 @@ func registerRegexTranslator(v *validator.Validate, utTranslator ut.Translator) 
 		}
 		return t
 	})
+
 	if err != nil {
 		panic(err)
 	}
@@ -82,6 +85,7 @@ func registerLabelTagName() validator.TagNameFunc {
 		if label != "" {
 			return "【" + label + "】"
 		}
+
 		return field.Name
 	}
 }

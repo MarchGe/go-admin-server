@@ -49,9 +49,11 @@ func (s *ExplorerSftpService) ListEntries(parentDir string, host *dvmodel.Host) 
 		}
 		return nil, err
 	}
+
 	if !info.IsDir() {
 		return nil, E.Message("父目录参数有误")
 	}
+
 	dirEntries, err := client.ReadDir(parentDir)
 	if err != nil {
 		if errors.Is(err, os.ErrPermission) {
@@ -59,8 +61,10 @@ func (s *ExplorerSftpService) ListEntries(parentDir string, host *dvmodel.Host) 
 		}
 		return nil, err
 	}
+
 	var length = len(dirEntries)
 	entries := make([]*dvRes.ExplorerEntry, length)
+
 	for i, item := range dirEntries {
 		entry := &dvRes.ExplorerEntry{
 			Name: item.Name(),
@@ -68,6 +72,7 @@ func (s *ExplorerSftpService) ListEntries(parentDir string, host *dvmodel.Host) 
 		}
 		entries[i] = entry
 	}
+
 	return entries, nil
 }
 
@@ -77,6 +82,7 @@ func (s *ExplorerSftpService) getSftpClient(host *dvmodel.Host) (*sftp.Client, e
 		slog.Error("ssh connect error", slog.Any("err", err))
 		return nil, E.Message("SSH连接失败")
 	}
+
 	return sftp.NewClient(sshClient)
 }
 
@@ -85,6 +91,7 @@ func (s *ExplorerSftpService) sshConnect(host *dvmodel.Host) (*ssh.Client, error
 	if err != nil {
 		return nil, err
 	}
+
 	clientConfig := ssh.ClientConfig{
 		User: host.User,
 		Auth: []ssh.AuthMethod{
@@ -93,6 +100,7 @@ func (s *ExplorerSftpService) sshConnect(host *dvmodel.Host) (*ssh.Client, error
 		Timeout:         constant.SshEstablishTimeoutInSeconds * time.Second,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
 	}
+
 	addr := fmt.Sprintf("%s:%d", host.Ip, host.Port)
 	return ssh.Dial("tcp", addr, &clientConfig)
 }
@@ -103,6 +111,7 @@ func (s *ExplorerSftpService) DeleteEntry(path string, host *dvmodel.Host) error
 		return fmt.Errorf("get sftp client error, %w", err)
 	}
 	defer func() { _ = client.Close() }()
+
 	return client.RemoveAll(path)
 }
 
@@ -112,15 +121,18 @@ func (s *ExplorerSftpService) UploadFile(filePath string, file multipart.File, h
 		return fmt.Errorf("get sftp client error, %w", err)
 	}
 	defer func() { _ = client.Close() }()
+
 	parentDir := filepath.ToSlash(filepath.Dir(filePath))
 	if err = client.MkdirAll(parentDir); err != nil {
 		return fmt.Errorf("sftp mkdir error, %w", err)
 	}
+
 	f, err := client.Create(filePath)
 	if err != nil {
 		return fmt.Errorf("sftp create file error, %w", err)
 	}
 	defer func() { _ = f.Close() }()
+
 	_, err = io.Copy(f, file)
 	return err
 }
@@ -136,6 +148,7 @@ func (s *ExplorerSftpService) DownloadFile(filePath string, host *dvmodel.Host, 
 	if err != nil {
 		return E.Message("获取文件信息失败")
 	}
+
 	if info.IsDir() {
 		return E.Message("不支持下载文件夹")
 	}
@@ -145,6 +158,7 @@ func (s *ExplorerSftpService) DownloadFile(filePath string, host *dvmodel.Host, 
 		return fmt.Errorf("sftp open file error, %w", err)
 	}
 	defer file.Close()
+
 	_, err = io.Copy(w, file)
 	return err
 }
@@ -155,11 +169,13 @@ func (s *ExplorerSftpService) CreateDir(r *req.SftpCreateDirReq, host *dvmodel.H
 		return fmt.Errorf("get sftp client error, %w", err)
 	}
 	defer func() { _ = client.Close() }()
+
 	dir := path.Clean(r.Dir + "/" + r.Name)
 	_, err = client.Stat(dir)
 	if !os.IsNotExist(err) {
 		return E.Message("目录已存在")
 	}
+
 	return client.MkdirAll(dir)
 }
 
@@ -169,15 +185,18 @@ func (s *ExplorerSftpService) Rename(r *req.SftpRenameReq, host *dvmodel.Host) e
 		return fmt.Errorf("get sftp client error, %w", err)
 	}
 	defer func() { _ = client.Close() }()
+
 	oldPath := path.Clean(r.Dir + "/" + r.OldName)
 	newPath := path.Clean(r.Dir + "/" + r.NewName)
 	if oldPath == newPath {
 		return nil
 	}
+
 	_, err = client.Stat(newPath)
 	if !os.IsNotExist(err) {
 		return E.Message("目标文件（或目录）已存在")
 	}
+
 	if err = client.Rename(oldPath, newPath); err != nil {
 		if os.IsNotExist(err) {
 			return E.Message("旧文件（或目录）不存在")
@@ -187,5 +206,6 @@ func (s *ExplorerSftpService) Rename(r *req.SftpRenameReq, host *dvmodel.Host) e
 		}
 		return err
 	}
+
 	return nil
 }

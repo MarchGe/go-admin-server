@@ -25,10 +25,12 @@ func AddTask(buzId int64, cronStr string, t Task) error {
 	if _, ok := taskMap[buzId]; ok {
 		return nil
 	}
+
 	entryId, err := c.AddFunc(cronStr, t)
 	if err != nil {
 		return fmt.Errorf("add task to scheduler error, %w", err)
 	}
+
 	taskMap[buzId] = entryId
 	return nil
 }
@@ -47,6 +49,7 @@ func VerifyCron(cronStr string) error {
 	if _, err := parser.Parse(cronStr); err != nil {
 		return E.Message("Cron表达式解析失败")
 	}
+
 	return nil
 }
 

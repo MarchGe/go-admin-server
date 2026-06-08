@@ -34,17 +34,21 @@ func GlobalErrHandler() gin.HandlerFunc {
 						R.Fail(c, joinErrors(validationErrors, translator), http.StatusBadRequest)
 						return
 					}
+
 					args := []any{
 						slog.String("requestId", c.GetString(constant.RequestId)),
 						slog.Any("err", appErr.Err),
 					}
+
 					if cfg.Log.StackTrace {
 						args = append(args, slog.String("error stack", string(debug.Stack())))
 					}
+
 					slog.Error(constant.ServerInternalError, args...)
 					if cfg.Environment == config.DEV {
 						_, _ = os.Stderr.Write(debug.Stack())
 					}
+
 					recorder.RecordExceptionLog(c, fmt.Sprintf("requestId=%s", c.GetString(constant.RequestId)))
 					R.Fail(c, constant.ServerInternalError, http.StatusInternalServerError)
 					return
@@ -53,13 +57,16 @@ func GlobalErrHandler() gin.HandlerFunc {
 					slog.String("requestId", c.GetString(constant.RequestId)),
 					slog.Any("err", err),
 				}
+
 				if cfg.Log.StackTrace {
 					args = append(args, slog.String("error stack", string(debug.Stack())))
 				}
+
 				slog.Error(constant.ServerInternalError, args...)
 				if cfg.Environment == config.DEV {
 					_, _ = os.Stderr.Write(debug.Stack())
 				}
+
 				recorder.RecordExceptionLog(c, fmt.Sprintf("requestId=%s", c.GetString(constant.RequestId)))
 				R.Fail(c, constant.ServerInternalError, http.StatusInternalServerError)
 				return
@@ -74,5 +81,6 @@ func joinErrors(errs validator.ValidationErrors, translator ut.Translator) strin
 	for i, item := range errs {
 		errStrings[i] = item.Translate(translator)
 	}
+
 	return strings.Join(errStrings, ",")
 }

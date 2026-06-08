@@ -23,5 +23,6 @@ func createSessionStore(cookieCfg *config.CookieConfig) sessions.Store {
 		Secure:   cookieCfg.Secure,
 		HttpOnly: cookieCfg.HttpOnly,
 	})
+
 	return store
 }

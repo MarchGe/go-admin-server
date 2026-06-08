@@ -23,6 +23,7 @@ func RequiresPermissions(permissions ...string) gin.HandlerFunc {
 			c.Next()
 			return
 		}
+
 		userId := c.GetInt64(constant.SessionUserId)
 		enforcer := GetEnforcer()
 		for _, permission := range permissions {
@@ -35,6 +36,7 @@ func RequiresPermissions(permissions ...string) gin.HandlerFunc {
 				return
 			}
 		}
+
 		R.Fail(c, fmt.Sprintf("没有权限执行该操作，缺少权限: %s", strings.Join(permissions, " | ")), http.StatusForbidden)
 		return
 	}
@@ -44,10 +46,12 @@ func parsePermission(permission string) (string, string, error) {
 	if !strings.Contains(permission, ":") {
 		return "", "", fmt.Errorf("permission string '%s' must contains ':'", permission)
 	}
+
 	parts := strings.Split(permission, ":")
 	if len(parts) > 2 {
 		return "", "", fmt.Errorf("permission string '%s' contains at most one ':'", permission)
 	}
+
 	return parts[0], parts[1], nil
 }
 
@@ -55,23 +59,28 @@ func GetEnforcer() *casbin.Enforcer {
 	if _enforcer != nil {
 		return _enforcer
 	}
+
 	mux.Lock()
 	defer mux.Unlock()
 	if _enforcer != nil {
 		return _enforcer
 	}
+
 	m, err := model.NewModelFromString(ModelString)
 	if err != nil {
 		panic(err)
 	}
+
 	adapter, err := gormadapter.NewAdapterByDB(database.GetMysql())
 	if err != nil {
 		panic(err)
 	}
+
 	_enforcer, err = casbin.NewEnforcer(m, adapter)
 	if err != nil {
 		panic(err)
 	}
+
 	return _enforcer
 }
 
@@ -90,13 +99,16 @@ func UpdateSubPolicies(sub string, permissionStrings []string) error {
 			permission := strings.Split(symbol, ":")
 			permissions[i] = permission
 		}
+
 		if len(permissions) > 0 {
 			if _, err := enforcer.AddPermissionsForUser(sub, permissions...); err != nil {
 				return fmt.Errorf("add permissions for user error when update sub policies, %w", err)
 			}
 		}
+
 		return nil
 	})
+
 	return err
 }
 
@@ -104,6 +116,7 @@ func DeleteUser(sub string) error {
 	if _, err := GetEnforcer().DeleteUser(sub); err != nil {
 		return fmt.Errorf("casbin delete user error, %w", err)
 	}
+
 	return nil
 }
 
@@ -111,6 +124,7 @@ func DeleteRole(sub string) error {
 	if _, err := GetEnforcer().DeleteRole(sub); err != nil {
 		return fmt.Errorf("casbin delete role error, %w", err)
 	}
+
 	return nil
 }
 
@@ -119,6 +133,7 @@ func DeletePermission(permissionString string) error {
 	if _, err := GetEnforcer().DeletePermission(permission...); err != nil {
 		return fmt.Errorf("casbin delete psermission error, %w", err)
 	}
+
 	return nil
 }
 
@@ -130,16 +145,19 @@ func UpdateGroupingPolicies(userSub string, roleSubs []string) error {
 		if _, err := enforcer.DeleteRolesForUser(userSub); err != nil {
 			return fmt.Errorf("delete roles for user error when update grouping policies, %w", err)
 		}
+
 		// 用户绑定新角色
 		rules := make([][]string, len(roleSubs))
 		for i, roleSub := range roleSubs {
 			rules[i] = []string{userSub, roleSub}
 		}
+
 		if len(rules) > 0 {
 			if _, err := enforcer.AddGroupingPolicies(rules); err != nil {
 				return fmt.Errorf("add grouping policies error when update grouping policies, %w", err)
 			}
 		}
+
 		return nil
 	})
 	return err

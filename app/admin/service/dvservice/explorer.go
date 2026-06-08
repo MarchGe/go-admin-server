@@ -26,9 +26,11 @@ func (s *ExplorerService) ListEntries(parentDir string) ([]*dvRes.ExplorerEntry,
 		}
 		return nil, err
 	}
+
 	if !info.IsDir() {
 		return nil, E.Message("父目录参数有误")
 	}
+
 	dirEntries, err := os.ReadDir(parentDir)
 	if err != nil {
 		if errors.Is(err, os.ErrPermission) {
@@ -36,8 +38,10 @@ func (s *ExplorerService) ListEntries(parentDir string) ([]*dvRes.ExplorerEntry,
 		}
 		return nil, err
 	}
+
 	var length = len(dirEntries)
 	entries := make([]*dvRes.ExplorerEntry, length)
+
 	for i, item := range dirEntries {
 		entry := &dvRes.ExplorerEntry{
 			Name: item.Name(),
@@ -45,11 +49,13 @@ func (s *ExplorerService) ListEntries(parentDir string) ([]*dvRes.ExplorerEntry,
 		}
 		entries[i] = entry
 	}
+
 	return entries, nil
 }
 
 func parseType(mode os.FileMode) dvRes.EntryType {
 	fileType := mode.Type()
+
 	switch {
 	case fileType.IsDir():
 		return dvRes.EntryTypeDir
@@ -66,5 +72,6 @@ func parseType(mode os.FileMode) dvRes.EntryType {
 			return dvRes.EntryTypeBlockDevice
 		}
 	}
+
 	return dvRes.EntryTypeDefault
 }

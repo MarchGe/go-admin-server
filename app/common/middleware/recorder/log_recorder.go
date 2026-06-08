@@ -24,12 +24,14 @@ func RecordLoginLog(c *gin.Context, userId int64) {
 	if !config.GetConfig().Log.LoginLog {
 		return
 	}
+
 	logService := service.GetLogService()
 	userAgent, clientIp := getInfoFromRequest(c)
 	log := &model.LoginLog{
 		UserAgent: userAgent,
 		Ip:        clientIp,
 	}
+
 	u := getUserInfo(userId)
 	log.UserId = u.Id
 	log.Nickname = u.Nickname
@@ -37,6 +39,7 @@ func RecordLoginLog(c *gin.Context, userId int64) {
 	if dept := u.Dept; dept != nil {
 		log.DeptName = dept.Name
 	}
+
 	log.CreateTime = time.Now()
 	log.UpdateTime = time.Now()
 	if err := logService.AddLoginLog(log); err != nil {
@@ -56,6 +59,7 @@ func RecordOpLog(opTarget string, v ...any) gin.HandlerFunc {
 			UserAgent: userAgent,
 			Ip:        clientIp,
 		}
+
 		userId := c.GetInt64(constant.SessionUserId)
 		if userId != 0 {
 			if user := getUserInfo(userId); user != nil {
@@ -67,6 +71,7 @@ func RecordOpLog(opTarget string, v ...any) gin.HandlerFunc {
 				}
 			}
 		}
+
 		var private bool
 		if len(v) == 0 {
 			log.Action = parseMethod(c.Request.Method)
@@ -82,6 +87,7 @@ func RecordOpLog(opTarget string, v ...any) gin.HandlerFunc {
 			log.Action = v[0].(string)
 			private = v[1].(bool)
 		}
+
 		log.Path = c.Request.URL.Path
 		log.Target = opTarget
 		if private {
@@ -108,6 +114,7 @@ func RecordOpLog(opTarget string, v ...any) gin.HandlerFunc {
 				}
 			}
 		}
+
 		log.CreateTime = time.Now()
 		log.UpdateTime = time.Now()
 		c.Next()
@@ -129,6 +136,7 @@ func RecordExceptionLog(c *gin.Context, errString string) {
 		UserAgent: userAgent,
 		Ip:        clientIp,
 	}
+
 	userId := c.GetInt64(constant.SessionUserId)
 	if userId != 0 {
 		if user := getUserInfo(userId); user != nil {
@@ -136,16 +144,19 @@ func RecordExceptionLog(c *gin.Context, errString string) {
 			log.Nickname = user.Nickname
 		}
 	}
+
 	log.Path = c.Request.URL.Path
 	log.Query = c.Request.URL.Query().Encode()
 	if len(log.Query) > logContentExceedLimit {
 		log.Query = "[too long ignored]"
 	}
+
 	contentLengthStr := c.GetHeader("Content-Length")
 	var contentLength int
 	if contentLengthStr != "" {
 		contentLength, _ = strconv.Atoi(contentLengthStr)
 	}
+
 	if contentLength > logContentExceedLimit {
 		log.Body = "[too long ignored]"
 	} else {
@@ -156,6 +167,7 @@ func RecordExceptionLog(c *gin.Context, errString string) {
 			log.Body = string(body)
 		}
 	}
+
 	log.Error = errString
 	log.CreateTime = time.Now()
 	log.UpdateTime = time.Now()
@@ -173,9 +185,11 @@ func GetBodyContent(c *gin.Context) (body []byte, bodyIgnored bool) {
 		c.Request.Body = io.NopCloser(bytes.NewReader(requestBodyBytes))
 		ignoreBody = false
 	}
+
 	if ignoreBody {
 		return nil, true
 	}
+
 	return requestBodyBytes, false
 }
 
@@ -216,6 +230,7 @@ func getUserInfo(userId int64) *model.User {
 		slog.Error("get current user temp info from cache error", slog.Any("err", err))
 		return nil
 	}
+
 	cacheU := &cacheUserTemp{}
 	if err = json.Unmarshal(userBytes, cacheU); err != nil {
 		slog.Error("json unmarshal current user temp info error", slog.Any("err", err))
@@ -225,6 +240,7 @@ func getUserInfo(userId int64) *model.User {
 	if time.Now().Sub(cacheU.T) > 10*time.Second {
 		return getUserInfoAndSaveToCache(userId, cacheKey)
 	}
+
 	return cacheU.U
 }
 
@@ -233,18 +249,22 @@ func getUserInfoAndSaveToCache(userId int64, cacheKey string) *model.User {
 	if user == nil {
 		return nil
 	}
+
 	cacheU := &cacheUserTemp{
 		T: time.Now(),
 		U: user,
 	}
+
 	uBytes, err := json.Marshal(cacheU)
 	if err != nil {
 		slog.Error("json marshal current user temp info error", slog.Any("err", err))
 		return nil
 	}
+
 	if err := utils.GetCache().Set(cacheKey, uBytes); err != nil {
 		slog.Error("set current user temp info to cache error", slog.Any("err", err))
 		return nil
 	}
+
 	return user
 }

@@ -11,11 +11,17 @@ import (
 
 type ConcreteTask interface {
 	FindOneById(id int64) (*task.DeployTask, error)
+
 	Create(tx *gorm.DB, data map[string]any) (id int64, err error)
+
 	Update(tx *gorm.DB, data map[string]any, id int64) error
+
 	Delete(tx *gorm.DB, t *task.Task) error
+
 	Start(ctx context.Context, t *task.Task) error
+
 	Run(ctx context.Context, t *task.Task) error
+
 	Stop(ctx context.Context, t *task.Task) error
 }
 

@@ -12,7 +12,6 @@ import (
 	"os"
 )
 
-// TODO grpc服务集成到微服务中...
 func Run(ctx context.Context, address string) {
 	slog.Info("starting grpc server on address: " + address)
 	listener, err := net.Listen("tcp", address)
@@ -20,6 +19,7 @@ func Run(ctx context.Context, address string) {
 		slog.Error("net listen on address fail", slog.Any("err", err))
 		os.Exit(1)
 	}
+
 	server := grpc.NewServer(grpc.ChainUnaryInterceptor(addUnaryInterceptors()...))
 	registerGrpcService(server)
 
@@ -49,6 +49,7 @@ func globalErrHandle() grpc.UnaryServerInterceptor {
 				err = status.Errorf(codes.Internal, "RPC服务出错了! err: %v", r)
 			}
 		}()
+
 		resp, err = handler(ctx, req)
 		return resp, err
 	}

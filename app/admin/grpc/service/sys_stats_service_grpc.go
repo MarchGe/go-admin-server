@@ -21,6 +21,7 @@ func (s SysStatsServiceGrpc) ReportHostInformation(ctx context.Context, info *mo
 		slog.Error("-", slog.Any("err", err))
 		return &emptypb.Empty{}, nil
 	}
+
 	return &emptypb.Empty{}, nil
 
 }
@@ -31,5 +32,6 @@ func (s SysStatsServiceGrpc) ReportSystemStats(ctx context.Context, stats *model
 		slog.Error("-", slog.Any("err", err))
 		return &emptypb.Empty{}, nil
 	}
+
 	return &emptypb.Empty{}, nil
 }

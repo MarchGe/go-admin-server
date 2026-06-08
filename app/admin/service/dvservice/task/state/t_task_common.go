@@ -51,6 +51,7 @@ func (s *TaskStateCommon) Start(ctx context.Context, t *task.ScriptTask) error {
 			s.updateStatus(t.Id, task.StatusStopped)
 			return err
 		}
+
 		if err = s.updateStatus(t.Id, task.StatusActive); err != nil {
 			return err
 		}
@@ -58,12 +59,14 @@ func (s *TaskStateCommon) Start(ctx context.Context, t *task.ScriptTask) error {
 		if err := s.updateStatus(t.Id, task.StatusRunning); err != nil {
 			return err
 		}
+
 		go func() {
 			defer func() {
 				if r := recover(); r != nil {
 					slog.Error("execute task error", slog.Int64("taskId", t.Id), slog.Any("err", r), slog.String("err stack", string(debug.Stack())))
 				}
 			}()
+
 			uId := ctx.Value("uId").(int64)
 			if e := s.Run(ctx, t); e != nil {
 				slog.Error("Execute script task error", slog.Int64("taskId", t.Id), slog.Any("err", e))
@@ -73,11 +76,13 @@ func (s *TaskStateCommon) Start(ctx context.Context, t *task.ScriptTask) error {
 			}
 		}()
 	}
+
 	return nil
 }
 
 func (s *TaskStateCommon) Run(ctx context.Context, t *task.ScriptTask) (err error) {
 	slog.Info("Executing script task", slog.Int64("id", t.Id), slog.String("name", t.Name))
+
 	defer func() {
 		if t.ExecuteType == task.ExecuteTypeAuto {
 			_ = s.updateStatusIfNotStopped(t.Id, task.StatusActive)
@@ -89,11 +94,13 @@ func (s *TaskStateCommon) Run(ctx context.Context, t *task.ScriptTask) (err erro
 			}
 		}
 	}()
+
 	if t.Kind == task.KindLocal {
 		err = s.executeLocalTask(ctx, t)
 	} else {
 		err = s.executeRemoteTask(ctx, t)
 	}
+
 	return err
 }
 

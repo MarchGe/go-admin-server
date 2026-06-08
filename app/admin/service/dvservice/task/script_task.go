@@ -34,6 +34,7 @@ func InitActivatedTasks() {
 	if err != nil {
 		slog.Error("Initiating activated script task to scheduler error", slog.Any("err", err))
 	}
+
 	for _, t := range tasks {
 		scheduler.AddTask(t.Id, t.Cron, func() {
 			// uId直接传递0，因为自动执行的脚本任务不需要用户id
@@ -50,6 +51,7 @@ func (s *ScriptTaskService) Create(info *req.ScriptTaskUpsertReq) error {
 	t.Status = task.StatusNotRunning
 	t.CreateTime = time.Now()
 	t.UpdateTime = time.Now()
+
 	err := database.GetMysql().Transaction(func(tx *gorm.DB) error {
 		if err := tx.Save(t).Error; err != nil {
 			return err
@@ -57,6 +59,7 @@ func (s *ScriptTaskService) Create(info *req.ScriptTaskUpsertReq) error {
 		if err := tx.Where("task_id = ?", t.Id).Delete(&task.ScriptTaskScript{}).Error; err != nil {
 			return err
 		}
+
 		scripts := make([]*task.ScriptTaskScript, len(info.ScriptIds))
 		for i := range info.ScriptIds {
 			scripts[i] = &task.ScriptTaskScript{
@@ -64,8 +67,10 @@ func (s *ScriptTaskService) Create(info *req.ScriptTaskUpsertReq) error {
 				ScriptId: info.ScriptIds[i],
 			}
 		}
+
 		return tx.Save(scripts).Error
 	})
+
 	return err
 }
 
